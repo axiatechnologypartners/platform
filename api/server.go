@@ -4,17 +4,19 @@
 package api
 
 import (
+	"net/http"
+	"strings"
+	"time"
+
 	l4g "github.com/alecthomas/log4go"
 	"github.com/braintree/manners"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/mattermost/platform/model"
 	"github.com/mattermost/platform/store"
 	"github.com/mattermost/platform/utils"
 	"gopkg.in/throttled/throttled.v1"
 	throttledStore "gopkg.in/throttled/throttled.v1/store"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type Server struct {
@@ -74,7 +76,12 @@ func StartServer() {
 	}
 
 	go func() {
-		err := manners.ListenAndServe(utils.Cfg.ServiceSettings.ListenAddress, handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler))
+		var err error
+		if *utils.Cfg.ServiceSettings.ConnectionSecurity == model.CONN_SECURITY_TLS {
+			err = manners.ListenAndServeTLS(utils.Cfg.ServiceSettings.ListenAddress, *utils.Cfg.ServiceSettings.TLSCertFile, *utils.Cfg.ServiceSettings.TLSKeyFile, handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler))
+		} else {
+			err = manners.ListenAndServe(utils.Cfg.ServiceSettings.ListenAddress, handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler))
+		}
 		if err != nil {
 			l4g.Critical(utils.T("api.server.start_server.starting.critical"), err)
 			time.Sleep(time.Second)

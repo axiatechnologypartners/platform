@@ -2,6 +2,9 @@
     "ServiceSettings": {
         "SiteURL": "",
         "ListenAddress": ":8065",
+        "ConnectionSecurity": "",
+        "TLSCertFile": "",
+        "TLSKeyFile": "",
         "MaximumLoginAttempts": 10,
         "SegmentDeveloperKey": "",
         "GoogleDeveloperKey": "",
