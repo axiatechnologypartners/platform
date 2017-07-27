@@ -26,7 +26,7 @@ func (me *LogoutProvider) GetTrigger() string {
 func (me *LogoutProvider) GetCommand(T goi18n.TranslateFunc) *model.Command {
 	return &model.Command{
 		Trigger:          CMD_LOGOUT,
-		AutoComplete:     true,
+		AutoComplete:     false, 
 		AutoCompleteDesc: T("api.command_logout.desc"),
 		AutoCompleteHint: "",
 		DisplayName:      T("api.command_logout.name"),

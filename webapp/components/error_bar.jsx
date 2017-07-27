@@ -41,7 +41,8 @@ export default class ErrorBar extends React.Component {
             isSystemAdmin = Utils.isSystemAdmin(user.roles);
         }
 
-        const errorIgnored = ErrorStore.getIgnoreNotification();
+        //const errorIgnored = ErrorStore.getIgnoreNotification();
+	const errorIgnored = true;
 
         if (!errorIgnored) {
             if (isSystemAdmin && global.mm_config.SiteURL === '') {
@@ -217,16 +218,7 @@ export default class ErrorBar extends React.Component {
         }
 
         return (
-            <div className={errClass}>
-                <span>{message}</span>
-                <a
-                    href='#'
-                    className='error-bar__close'
-                    onClick={this.handleClose}
-                >
-                    {'×'}
-                </a>
-            </div>
+		<span></span>
         );
     }
 }

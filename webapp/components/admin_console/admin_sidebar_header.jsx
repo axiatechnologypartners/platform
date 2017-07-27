@@ -4,9 +4,9 @@
 import $ from 'jquery';
 import AdminNavbarDropdown from './admin_navbar_dropdown.jsx';
 import UserStore from 'stores/user_store.jsx';
-import Client from 'client/web_client.jsx';
+import Client from 'client/web_client.jsx'; 
 
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage} from 'react-intl'; 
 
 import React from 'react';
 
@@ -47,25 +47,9 @@ export default class SidebarHeader extends React.Component {
             );
         }
 
+	//Kerauno Chat - Removed Team Header
         return (
-            <div className='team__header theme'>
-                <a
-                    href='#'
-                    onClick={this.toggleDropdown}
-                >
-                    {profilePicture}
-                    <div className='header__info'>
-                        <div className='user__name'>{'@' + me.username}</div>
-                        <div className='team__name'>
-                            <FormattedMessage
-                                id='admin.sidebarHeader.systemConsole'
-                                defaultMessage='System Console'
-                            />
-                        </div>
-                    </div>
-                </a>
-                <AdminNavbarDropdown ref='dropdown'/>
-            </div>
+					<span></span>
         );
     }
 }

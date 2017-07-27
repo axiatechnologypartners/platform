@@ -13,6 +13,7 @@ import (
 )
 
 func SaveBrandImage(imageData *multipart.FileHeader) *model.AppError {
+	return nil
 	if len(utils.Cfg.FileSettings.DriverName) == 0 {
 		return model.NewAppError("SaveBrandImage", "api.admin.upload_brand_image.storage.app_error", nil, "", http.StatusNotImplemented)
 	}

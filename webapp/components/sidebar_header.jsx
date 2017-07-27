@@ -13,6 +13,36 @@ import {Tooltip, OverlayTrigger} from 'react-bootstrap';
 import {Preferences, TutorialSteps, Constants} from 'utils/constants.jsx';
 import {createMenuTip} from 'components/tutorial/tutorial_tip.jsx';
 
+export function changeCss(className, classValue) {
+    let styleEl = document.querySelector('style[data-class="' + className + '"]');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.setAttribute('data-class', className);
+
+        // Append style element to head
+        document.head.appendChild(styleEl);
+    }
+
+    // Grab style sheet
+    const styleSheet = styleEl.sheet;
+    const rules = styleSheet.cssRules || styleSheet.rules;
+    const style = classValue.substr(0, classValue.indexOf(':'));
+    const value = classValue.substr(classValue.indexOf(':') + 1);
+
+    for (let i = 0; i < rules.length; i++) {
+        if (rules[i].selectorText === className) {
+            rules[i].style[style] = value;
+            return;
+        }
+    }
+
+    let mediaQuery = '';
+    if (className.indexOf('@media') >= 0) {
+        mediaQuery = '}';
+    }
+    styleSheet.insertRule(className + '{' + classValue + '}' + mediaQuery, styleSheet.cssRules.length);
+}
+
 export default class SidebarHeader extends React.Component {
     constructor(props) {
         super(props);
@@ -75,7 +105,7 @@ export default class SidebarHeader extends React.Component {
                 <div className='team__name'>{this.props.teamDisplayName}</div>
             );
         } else {
-            teamNameWithToolTip = (
+            teamNameWithToolTip = ( 
                 <OverlayTrigger
                     trigger={['hover', 'focus']}
                     delayShow={Constants.OVERLAY_TIME_DELAY}
@@ -87,25 +117,20 @@ export default class SidebarHeader extends React.Component {
                 </OverlayTrigger>
             );
         }
+				
+				var username = this.props.currentUser.username;
+				if(username.includes("guest")) {
+					//alert('i think you may be a guest');
+					 changeCss('.ps-container','display:none!important;');
+					 changeCss('.sidebar--left','width:0px!important;');
+					 changeCss('.channel-header.alt','display:none!important;');
+					 changeCss('.app__content','margin-left:0px!important;');
+				} // end if
+					
 
+				//Kerauno Chat - Removed Team Header
         return (
-            <div className='team__header theme'>
-                {tutorialTip}
-                <div>
-                    {profilePicture}
-                    <div className='header__info'>
-                        <div className='user__name'>{'@' + me.username}</div>
-                        {teamNameWithToolTip}
-                    </div>
-                </div>
-                <SidebarHeaderDropdown
-                    ref='dropdown'
-                    teamType={this.props.teamType}
-                    teamDisplayName={this.props.teamDisplayName}
-                    teamName={this.props.teamName}
-                    currentUser={this.props.currentUser}
-                />
-            </div>
+					<span></span>
         );
     }
 }

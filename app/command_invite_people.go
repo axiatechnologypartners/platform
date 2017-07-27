@@ -30,7 +30,7 @@ func (me *InvitePeopleProvider) GetTrigger() string {
 func (me *InvitePeopleProvider) GetCommand(T goi18n.TranslateFunc) *model.Command {
 	return &model.Command{
 		Trigger:          CMD_INVITE_PEOPLE,
-		AutoComplete:     true,
+		AutoComplete:     false,
 		AutoCompleteDesc: T("api.command.invite_people.desc"),
 		AutoCompleteHint: T("api.command.invite_people.hint"),
 		DisplayName:      T("api.command.invite_people.name"),

@@ -184,18 +184,9 @@ export function createOffTopicIntroMessage(channel, centeredIntro) {
 }
 
 export function createDefaultIntroMessage(channel, centeredIntro) {
+		//KERAUNO CHAT - REMOVED INVITE OTHERS TO THIS TEAM LINK
     let inviteModalLink = (
-        <a
-            className='intro-links'
-            href='#'
-            onClick={GlobalActions.showGetTeamInviteLinkModal}
-        >
-            <i className='fa fa-user-plus'/>
-            <FormattedMessage
-                id='intro_messages.inviteOthers'
-                defaultMessage='Invite others to this team'
-            />
-        </a>
+        <span></span>
     );
 
     const isAdmin = TeamStore.isTeamAdminForCurrentTeam() || UserStore.isSystemAdminForCurrentUser();
@@ -372,17 +363,9 @@ function createInviteChannelMemberButton(channel, uiType) {
 }
 
 function createSetHeaderButton(channel) {
+
+		//KERAUNO CHAT - Removed Set a Header Link
     return (
-        <ToggleModalButton
-            className='intro-links'
-            dialogType={EditChannelHeaderModal}
-            dialogProps={{channel}}
-        >
-            <i className='fa fa-pencil'/>
-            <FormattedMessage
-                id='intro_messages.setHeader'
-                defaultMessage='Set a Header'
-            />
-        </ToggleModalButton>
+        <span></span>
     );
 }

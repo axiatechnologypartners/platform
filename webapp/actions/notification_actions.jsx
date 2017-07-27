@@ -103,7 +103,10 @@ export function sendDesktopNotification(post, msgProps) {
     // the window itself is not active
     const activeChannel = ChannelStore.getCurrent();
     const channelId = channel ? channel.id : null;
-    const notify = (activeChannel && activeChannel.id !== channelId) || !NotificationStore.getFocus();
+	
+	//KERAUNO CHAT - ALWAYS NOTIFY? FOR NOW?
+    //const notify = (activeChannel && activeChannel.id !== channelId) || !NotificationStore.getFocus();
+    const notify = true;
 
     if (notify) {
         Utils.notifyMe(title, body, channel, teamId, duration, !sound);

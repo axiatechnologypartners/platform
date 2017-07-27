@@ -315,8 +315,8 @@ func writeFileResponse(filename string, contentType string, bytes []byte, toDown
 	}
 
 	// prevent file links from being embedded in iframes
-	w.Header().Set("X-Frame-Options", "DENY")
-	w.Header().Set("Content-Security-Policy", "Frame-ancestors 'none'")
+	//w.Header().Set("X-Frame-Options", "GOFORIT")
+	//w.Header().Set("Content-Security-Policy", "Frame-ancestors 'self'")
 
 	w.Write(bytes)
 

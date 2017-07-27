@@ -99,9 +99,9 @@ export function getCookie(name) {
     return '';
 }
 
-var requestedNotificationPermission = false;
+var requestedNotificationPermission = false; 
 
-export function notifyMe(title, body, channel, teamId, duration, silent) {
+export function notifyMe(title, body, channel, teamId, duration, silent) { 
     if (!('Notification' in window)) {
         return;
     }
@@ -1325,7 +1325,7 @@ export function handleFormattedTextClick(e) {
         }
     } else if (channelMentionAttribute) {
         e.preventDefault();
-        browserHistory.push('/' + TeamStore.getCurrent().name + '/channels/' + channelMentionAttribute.value);
+        browserHistory.push('/' + TeamStore.getCurrent().name + '/channels/' + channelMentionAttribute.value); 
     }
 }
 

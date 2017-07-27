@@ -192,8 +192,6 @@
 }
 
 .channel-intro {
-    border-bottom: 1px solid $light-gray;
-    margin: 0 auto 15px;
     padding: 0 15px;
 
     &.channel-intro--centered {
@@ -240,6 +238,7 @@
         @include border-radius(3px);
         background: $bg--gray;
         padding: 10px 15px;
+				display:none!important;
     }
 }
 
@@ -400,6 +399,7 @@
         .navbar-toggle {
             &.menu-toggle {
                 padding: 0 1em;
+								display: none!important;
             }
         }
     }

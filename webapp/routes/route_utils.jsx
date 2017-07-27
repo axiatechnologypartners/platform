@@ -12,11 +12,12 @@ export function createGetChildComponentsFunction(arrayOfComponents) {
     return (locaiton, callback) => callback(null, arrayOfComponents);
 }
 
+//KERAUNO CHAT (KER-352)
 export const notFoundParams = {
     title: Utils.localizeMessage('error.not_found.title', 'Page not found'),
     message: Utils.localizeMessage('error.not_found.message', 'The page you were trying to reach does not exist'),
     link: '/',
-    linkmessage: Utils.localizeMessage('error.not_found.link_message', 'Back to Mattermost')
+    linkmessage: Utils.localizeMessage('error.not_found.link_message', 'Back to Chat')
 };
 
 const mfaPaths = [

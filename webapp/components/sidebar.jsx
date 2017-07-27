@@ -537,7 +537,7 @@ export default class Sidebar extends React.Component {
 
         var icon = null;
         if (channel.type === Constants.OPEN_CHANNEL) {
-            icon = <div className='status'><i className='fa fa-globe'/></div>;
+            icon = <div className='status'><i className='fa fa-users'/></div>;
         } else if (channel.type === Constants.PRIVATE_CHANNEL) {
             icon = <div className='status'><i className='fa fa-lock'/></div>;
         } else if (channel.type === Constants.GM_CHANNEL) {
