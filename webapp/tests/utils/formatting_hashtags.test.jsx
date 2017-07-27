@@ -53,7 +53,7 @@ describe('TextFormatting.Hashtags', function() {
 
         assert.equal(
             TextFormatting.formatText('#test1/#test2').trim(),
-            "<p><a class='mention-link' href='#' data-hashtag='#test1'>#test1</a>/<wbr /><a class='mention-link' href='#' data-hashtag='#test2'>#test2</a></p>"
+            "<p><a class='mention-link' href='#' data-hashtag='#test1'>#test1</a>/<a class='mention-link' href='#' data-hashtag='#test2'>#test2</a></p>"
         );
 
         assert.equal(
@@ -137,12 +137,12 @@ describe('TextFormatting.Hashtags', function() {
 
         assert.equal(
             TextFormatting.formatText('#foo/#bar', {searchTerm: '#foo'}).trim(),
-            "<p><span class='search-highlight'><a class='mention-link' href='#' data-hashtag='#foo'>#foo</a></span>/<wbr /><a class='mention-link' href='#' data-hashtag='#bar'>#bar</a></p>"
+            "<p><span class='search-highlight'><a class='mention-link' href='#' data-hashtag='#foo'>#foo</a></span>/<a class='mention-link' href='#' data-hashtag='#bar'>#bar</a></p>"
         );
 
         assert.equal(
             TextFormatting.formatText('#foo/#bar', {searchTerm: 'bar'}).trim(),
-            "<p><a class='mention-link' href='#' data-hashtag='#foo'>#foo</a>/<wbr /><span class='search-highlight'><a class='mention-link' href='#' data-hashtag='#bar'>#bar</a></span></p>"
+            "<p><a class='mention-link' href='#' data-hashtag='#foo'>#foo</a>/<span class='search-highlight'><a class='mention-link' href='#' data-hashtag='#bar'>#bar</a></span></p>"
         );
 
         assert.equal(
@@ -160,13 +160,11 @@ describe('TextFormatting.Hashtags', function() {
         );
 
         let options = {
-            usernameMap: {
-                test: {id: '1234', username: 'test'}
-            }
+            atMentions: true
         };
         assert.equal(
             TextFormatting.formatText('#@test', options).trim(),
-            "<p>#<a class='mention-link' href='#' data-mention='test'>@test</a></p>"
+            '<p>#<span data-mention="test">@test</span></p>'
         );
 
         assert.equal(
@@ -186,8 +184,8 @@ describe('TextFormatting.Hashtags', function() {
         );
 
         assert.equal(
-            TextFormatting.formatText('#:taco:').trim(),
-            '<p>#<span alt=":taco:" class="emoticon" title=":taco:" style="background-image:url(/static/emoji/taco.png)"></span></p>'
+            TextFormatting.formatText('#:mattermost:').trim(),
+            '<p>#<span alt=":mattermost:" class="emoticon" title=":mattermost:" style="background-image:url(/static/emoji/mattermost.png)"></span></p>'
         );
 
         assert.equal(

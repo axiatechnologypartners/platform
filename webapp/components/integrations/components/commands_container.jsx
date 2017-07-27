@@ -6,15 +6,17 @@ import UserStore from 'stores/user_store.jsx';
 
 import {loadTeamCommands} from 'actions/integration_actions.jsx';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 
 export default class CommandsContainer extends React.Component {
     static get propTypes() {
         return {
-            team: React.PropTypes.object,
-            user: React.PropTypes.object,
-            children: React.PropTypes.node.isRequired,
-            isAdmin: React.PropTypes.bool
+            team: PropTypes.object,
+            user: PropTypes.object,
+            children: PropTypes.node.isRequired,
+            isAdmin: PropTypes.bool
         };
     }
 
@@ -38,7 +40,7 @@ export default class CommandsContainer extends React.Component {
         UserStore.addChangeListener(this.handleUserChange);
 
         if (window.mm_config.EnableCommands === 'true') {
-            loadTeamCommands();
+            loadTeamCommands((() => this.setState({loading: false})));
         }
     }
 
@@ -51,8 +53,7 @@ export default class CommandsContainer extends React.Component {
         const teamId = this.props.team.id;
 
         this.setState({
-            commands: IntegrationStore.getCommands(teamId),
-            loading: !IntegrationStore.hasReceivedCommands(teamId)
+            commands: IntegrationStore.getCommands(teamId)
         });
     }
 

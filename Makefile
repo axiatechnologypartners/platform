@@ -52,6 +52,9 @@ DIST_PATH=$(DIST_ROOT)/mattermost
 # Tests
 TESTS=.
 
+TESTFLAGS ?= -short
+TESTFLAGSEE ?= -test.short
+
 # Packages lists
 TE_PACKAGES=$(shell go list ./... | grep -v vendor)
 TE_PACKAGES_COMMA=$(shell echo $(TE_PACKAGES) | tr ' ' ',')
@@ -65,7 +68,7 @@ else
 ALL_PACKAGES_COMMA=$(TE_PACKAGES_COMMA)
 endif
 
-all: dist
+all: run
 
 dist: | check-style test package
 
@@ -120,6 +123,14 @@ ifeq ($(BUILD_ENTERPRISE_READY),true)
 		docker start mattermost-openldap > /dev/null; \
 		sleep 10; \
 	fi
+
+	@if [ $(shell docker ps -a | grep -ci mattermost-elasticsearch) -eq 0 ]; then \
+		echo starting mattermost-elasticsearch; \
+		docker run --name mattermost-elasticsearch -p 9200:9200 -e "http.host=0.0.0.0" -e "transport.host=127.0.0.1" -e "ES_JAVA_OPTS=-Xms250m -Xmx250m" -d grundleborg/elasticsearch:latest > /dev/null; \
+	elif [ $(shell docker ps | grep -ci mattermost-elasticsearch) -eq 0 ]; then \
+		echo restarting mattermost-elasticsearch; \
+		docker start mattermost-elasticsearch> /dev/null; \
+	fi
 endif
 
 stop-docker:
@@ -143,6 +154,11 @@ stop-docker:
 	@if [ $(shell docker ps -a | grep -ci mattermost-inbucket) -eq 1 ]; then \
 		echo stopping mattermost-inbucket; \
 		docker stop mattermost-inbucket > /dev/null; \
+	fi
+
+	@if [ $(shell docker ps -a | grep -ci mattermost-elasticsearch) -eq 1 ]; then \
+		echo stopping mattermost-elasticsearch; \
+		docker stop mattermost-elasticsearch > /dev/null; \
 	fi
 
 clean-docker:
@@ -170,6 +186,12 @@ clean-docker:
 		echo removing mattermost-inbucket; \
 		docker stop mattermost-inbucket > /dev/null; \
 		docker rm -v mattermost-inbucket > /dev/null; \
+	fi
+
+	@if [ $(shell docker ps -a | grep -ci mattermost-elasticsearch) -eq 1 ]; then \
+		echo removing mattermost-elasticsearch; \
+		docker stop mattermost-elasticsearch > /dev/null; \
+		docker rm -v mattermost-elasticsearch > /dev/null; \
 	fi
 
 check-client-style:
@@ -233,7 +255,7 @@ test-te: start-docker prepare-enterprise do-cover-file
 
 	@for package in $(TE_PACKAGES); do \
 		echo "Testing "$$package; \
-		$(GO) test $(GOFLAGS) -run=$(TESTS) -test.v -test.timeout=2000s -covermode=count -coverprofile=cprofile.out -coverpkg=$(ALL_PACKAGES_COMMA) $$package || exit 1; \
+		$(GO) test $(GOFLAGS) -run=$(TESTS) $(TESTFLAGS) -test.v -test.timeout=2000s -covermode=count -coverprofile=cprofile.out -coverpkg=$(ALL_PACKAGES_COMMA) $$package || exit 1; \
 		if [ -f cprofile.out ]; then \
 			tail -n +2 cprofile.out >> cover.out; \
 			rm cprofile.out; \
@@ -267,7 +289,7 @@ ifeq ($(BUILD_ENTERPRISE_READY),true)
 		$(GO) test $(GOFLAGS) -run=$(TESTS) -covermode=count -coverpkg=$(ALL_PACKAGES_COMMA) -c $$package; \
 		if [ -f $$(basename $$package).test ]; then \
 			echo "Testing "$$package; \
-			./$$(basename $$package).test -test.v -test.timeout=2000s -test.coverprofile=cprofile.out || exit 1; \
+			./$$(basename $$package).test -test.v $(TESTFLAGSEE) -test.timeout=2000s -test.coverprofile=cprofile.out || exit 1; \
 			if [ -f cprofile.out ]; then \
 				tail -n +2 cprofile.out >> cover.out; \
 				rm cprofile.out; \
@@ -310,7 +332,8 @@ cover:
 prepare-enterprise:
 ifeq ($(BUILD_ENTERPRISE_READY),true)
 	@echo Enterprise build selected, preparing
-	cp $(BUILD_ENTERPRISE_DIR)/imports.go cmd/platform/
+	mkdir -p imports/
+	cp $(BUILD_ENTERPRISE_DIR)/imports/imports.go imports/
 	rm -f enterprise
 	ln -s $(BUILD_ENTERPRISE_DIR) enterprise
 endif
@@ -334,6 +357,19 @@ build-client:
 
 	cd $(BUILD_WEBAPP_DIR) && $(MAKE) build
 
+build-job-server: build-job-server-linux build-job-server-mac build-job-server-windows
+
+build-job-server-linux: .prebuild prepare-enterprise
+	@echo Build mattermost job server for Linux amd64
+	env GOOS=linux GOARCH=amd64 $(GO) build $(GOFLAGS) $(GO_LINKER_FLAGS) ./jobs/jobserver
+
+build-job-server-osx: .prebuild prepare-enterprise
+	@echo Build mattermost job server for OSX amd64
+	env GOOS=darwin GOARCH=amd64 $(GO) build $(GOFLAGS) $(GO_LINKER_FLAGS) ./jobs/jobserver
+
+build-job-server-windows: .prebuild prepare-enterprise
+	@echo Build mattermost job server for Windows amd64
+	env GOOS=windows GOARCH=amd64 $(GO) build $(GOFLAGS) $(GO_LINKER_FLAGS) ./jobs/jobserver
 
 package: build build-client
 	@ echo Packaging mattermost
@@ -469,6 +505,10 @@ restart-server: | stop-server run-server
 
 restart-client: | stop-client run-client
 
+run-job-server:
+	@echo Running job server for development
+	$(GO) run $(GOFLAGS) $(GO_LINKER_FLAGS) ./jobs/jobserver/jobserver.go
+
 clean: stop-docker
 	@echo Cleaning
 
@@ -507,6 +547,8 @@ govet:
 	$(GO) vet $(GOFLAGS) ./app || exit 1
 	$(GO) vet $(GOFLAGS) ./cmd/platform || exit 1
 	$(GO) vet $(GOFLAGS) ./einterfaces || exit 1
+	$(GO) vet $(GOFLAGS) ./jobs || exit 1
+	$(GO) vet $(GOFLAGS) ./jobs/jobserver || exit 1
 	$(GO) vet $(GOFLAGS) ./manualtesting || exit 1
 	$(GO) vet $(GOFLAGS) ./model || exit 1
 	$(GO) vet $(GOFLAGS) ./model/gitlab || exit 1
@@ -515,12 +557,14 @@ govet:
 	$(GO) vet $(GOFLAGS) ./web || exit 1
 
 ifeq ($(BUILD_ENTERPRISE_READY),true)
-	$(GO) vet $(GOFLAGS) ./enterprise || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/account_migration || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/brand || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/cluster || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/compliance || exit 1
+	$(GO) vet $(GOFLAGS) ./enterprise/data_retention || exit 1
+	$(GO) vet $(GOFLAGS) ./enterprise/elasticsearch || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/emoji || exit 1
+	$(GO) vet $(GOFLAGS) ./enterprise/imports || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/ldap || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/metrics || exit 1
 	$(GO) vet $(GOFLAGS) ./enterprise/mfa || exit 1

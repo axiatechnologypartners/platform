@@ -13,6 +13,8 @@ import {loadMe, loginById, createUserWithInvite} from 'actions/user_actions.jsx'
 import * as Utils from 'utils/utils.jsx';
 import Constants from 'utils/constants.jsx';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 import {FormattedMessage, FormattedHTMLMessage} from 'react-intl';
 import {browserHistory, Link} from 'react-router/es6';
@@ -22,7 +24,7 @@ import logoImage from 'images/logo.png';
 export default class SignupEmail extends React.Component {
     static get propTypes() {
         return {
-            location: React.PropTypes.object
+            location: PropTypes.object
         };
     }
 
@@ -50,9 +52,9 @@ export default class SignupEmail extends React.Component {
         let teamDisplayName = '';
         let teamName = '';
         let teamId = '';
-        let loading = true;
-        let serverError = '';
-        let noOpenServerError = false;
+        let loading = false;
+        const serverError = '';
+        const noOpenServerError = false;
 
         if (hash && hash.length > 0) {
             const parsedData = JSON.parse(data);
@@ -60,37 +62,40 @@ export default class SignupEmail extends React.Component {
             teamDisplayName = parsedData.display_name;
             teamName = parsedData.name;
             teamId = parsedData.id;
-            loading = false;
         } else if (inviteId && inviteId.length > 0) {
             loading = true;
             getInviteInfo(
                 inviteId,
                 (inviteData) => {
                     if (!inviteData) {
+                        this.setState({loading: false});
                         return;
                     }
 
-                    serverError = '';
-                    teamDisplayName = inviteData.display_name;
-                    teamName = inviteData.name;
-                    teamId = inviteData.id;
+                    this.setState({
+                        loading: false,
+                        serverError: '',
+                        teamDisplayName: inviteData.display_name,
+                        teamName: inviteData.name,
+                        teamId: inviteData.id
+                    });
                 },
                 () => {
-                    noOpenServerError = true;
-                    serverError = (
-                        <FormattedMessage
-                            id='signup_user_completed.invalid_invite'
-                            defaultMessage='The invite link was invalid.  Please speak with your Administrator to receive an invitation.'
-                        />
-                    );
+                    this.setState({
+                        loading: false,
+                        noOpenServerError: true,
+                        serverError: (
+                            <FormattedMessage
+                                id='signup_user_completed.invalid_invite'
+                                defaultMessage='The invite link was invalid.  Please speak with your Administrator to receive an invitation.'
+                            />
+                        )
+                    });
                 }
             );
 
-            loading = false;
             data = null;
             hash = null;
-        } else {
-            loading = false;
         }
 
         return {
@@ -107,20 +112,6 @@ export default class SignupEmail extends React.Component {
         };
     }
 
-    finishSignup() {
-        loadMe(
-            () => {
-                const query = this.props.location.query;
-                GlobalActions.loadDefaultLocale();
-                if (query.redirect_to) {
-                    browserHistory.push(query.redirect_to);
-                } else {
-                    GlobalActions.redirectUserToDefaultTeam();
-                }
-            }
-        );
-    }
-
     handleSignupSuccess(user, data) {
         trackEvent('signup', 'signup_user_02_complete');
         loginById(
@@ -132,7 +123,7 @@ export default class SignupEmail extends React.Component {
                     BrowserStore.setGlobalItem(this.state.hash, JSON.stringify({usedBefore: true}));
                 }
 
-                loadMe(
+                loadMe().then(
                     () => {
                         const query = this.props.location.query;
                         if (query.redirect_to) {

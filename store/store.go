@@ -34,6 +34,7 @@ type Store interface {
 	Post() PostStore
 	User() UserStore
 	Audit() AuditStore
+	ClusterDiscovery() ClusterDiscoveryStore
 	Compliance() ComplianceStore
 	Session() SessionStore
 	OAuth() OAuthStore
@@ -47,6 +48,7 @@ type Store interface {
 	Status() StatusStore
 	FileInfo() FileInfoStore
 	Reaction() ReactionStore
+	Job() JobStore
 	MarkSystemRanUnitTests()
 	Close()
 	DropAllTables()
@@ -165,6 +167,8 @@ type PostStore interface {
 	InvalidateLastPostTimeCache(channelId string)
 	GetPostsCreatedAt(channelId string, time int64) StoreChannel
 	Overwrite(post *model.Post) StoreChannel
+	GetPostsByIds(postIds []string) StoreChannel
+	GetPostsBatchForIndexing(startTime int64, limit int) StoreChannel
 }
 
 type UserStore interface {
@@ -205,7 +209,8 @@ type UserStore interface {
 	AnalyticsActiveCount(time int64) StoreChannel
 	GetUnreadCount(userId string) StoreChannel
 	GetUnreadCountForChannel(userId string, channelId string) StoreChannel
-	GetRecentlyActiveUsersForTeam(teamId string) StoreChannel
+	GetRecentlyActiveUsersForTeam(teamId string, offset, limit int) StoreChannel
+	GetNewUsersForTeam(teamId string, offset, limit int) StoreChannel
 	Search(teamId string, term string, options map[string]bool) StoreChannel
 	SearchNotInTeam(notInTeamId string, term string, options map[string]bool) StoreChannel
 	SearchInChannel(channelId string, term string, options map[string]bool) StoreChannel
@@ -235,6 +240,15 @@ type AuditStore interface {
 	Save(audit *model.Audit) StoreChannel
 	Get(user_id string, offset int, limit int) StoreChannel
 	PermanentDeleteByUser(userId string) StoreChannel
+}
+
+type ClusterDiscoveryStore interface {
+	Save(discovery *model.ClusterDiscovery) StoreChannel
+	Delete(discovery *model.ClusterDiscovery) StoreChannel
+	Exists(discovery *model.ClusterDiscovery) StoreChannel
+	GetAll(discoveryType, clusterName string) StoreChannel
+	SetLastPingAt(discovery *model.ClusterDiscovery) StoreChannel
+	Cleanup() StoreChannel
 }
 
 type ComplianceStore interface {
@@ -336,7 +350,7 @@ type EmojiStore interface {
 	Save(emoji *model.Emoji) StoreChannel
 	Get(id string, allowFromCache bool) StoreChannel
 	GetByName(name string) StoreChannel
-	GetAll() StoreChannel
+	GetList(offset, limit int) StoreChannel
 	Delete(id string, time int64) StoreChannel
 }
 
@@ -369,4 +383,17 @@ type ReactionStore interface {
 	InvalidateCache()
 	GetForPost(postId string, allowFromCache bool) StoreChannel
 	DeleteAllWithEmojiName(emojiName string) StoreChannel
+}
+
+type JobStore interface {
+	Save(job *model.Job) StoreChannel
+	UpdateOptimistically(job *model.Job, currentStatus string) StoreChannel
+	UpdateStatus(id string, status string) StoreChannel
+	UpdateStatusOptimistically(id string, currentStatus string, newStatus string) StoreChannel
+	Get(id string) StoreChannel
+	GetAllPage(offset int, limit int) StoreChannel
+	GetAllByType(jobType string) StoreChannel
+	GetAllByTypePage(jobType string, offset int, limit int) StoreChannel
+	GetAllByStatus(status string) StoreChannel
+	Delete(id string) StoreChannel
 }

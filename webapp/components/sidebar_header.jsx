@@ -2,8 +2,8 @@
 // See License.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import Client from 'client/web_client.jsx';
 import PreferenceStore from 'stores/preference_store.jsx';
 import * as Utils from 'utils/utils.jsx';
 
@@ -12,87 +12,67 @@ import {Tooltip, OverlayTrigger} from 'react-bootstrap';
 
 import {Preferences, TutorialSteps, Constants} from 'utils/constants.jsx';
 import {createMenuTip} from 'components/tutorial/tutorial_tip.jsx';
-
-export function changeCss(className, classValue) {
-    let styleEl = document.querySelector('style[data-class="' + className + '"]');
-    if (!styleEl) {
-        styleEl = document.createElement('style');
-        styleEl.setAttribute('data-class', className);
-
-        // Append style element to head
-        document.head.appendChild(styleEl);
-    }
-
-    // Grab style sheet
-    const styleSheet = styleEl.sheet;
-    const rules = styleSheet.cssRules || styleSheet.rules;
-    const style = classValue.substr(0, classValue.indexOf(':'));
-    const value = classValue.substr(classValue.indexOf(':') + 1);
-
-    for (let i = 0; i < rules.length; i++) {
-        if (rules[i].selectorText === className) {
-            rules[i].style[style] = value;
-            return;
-        }
-    }
-
-    let mediaQuery = '';
-    if (className.indexOf('@media') >= 0) {
-        mediaQuery = '}';
-    }
-    styleSheet.insertRule(className + '{' + classValue + '}' + mediaQuery, styleSheet.cssRules.length);
-}
+import StatusDropdown from 'components/status_dropdown/index.jsx';
 
 export default class SidebarHeader extends React.Component {
     constructor(props) {
         super(props);
-
-        this.toggleDropdown = this.toggleDropdown.bind(this);
-        this.onPreferenceChange = this.onPreferenceChange.bind(this);
 
         this.state = this.getStateFromStores();
     }
 
     componentDidMount() {
         PreferenceStore.addChangeListener(this.onPreferenceChange);
+        window.addEventListener('resize', this.handleResize);
     }
 
     componentWillUnmount() {
         PreferenceStore.removeChangeListener(this.onPreferenceChange);
+        window.removeEventListener('resize', this.handleResize);
     }
 
-    getStateFromStores() {
+    handleResize = () => {
+        const isMobile = Utils.isMobile();
+        this.setState({isMobile});
+    }
+
+    getPreferences = () => {
+        if (!this.props.currentUser) {
+            return {};
+        }
         const tutorialStep = PreferenceStore.getInt(Preferences.TUTORIAL_STEP, this.props.currentUser.id, 999);
+        const showTutorialTip = tutorialStep === TutorialSteps.MENU_POPOVER && !Utils.isMobile();
 
-        return {showTutorialTip: tutorialStep === TutorialSteps.MENU_POPOVER && !Utils.isMobile()};
+        return {showTutorialTip};
     }
 
-    onPreferenceChange() {
-        this.setState(this.getStateFromStores());
+    getStateFromStores = () => {
+        const preferences = this.getPreferences();
+        const isMobile = Utils.isMobile();
+        return {...preferences, isMobile};
     }
 
-    toggleDropdown(e) {
+    onPreferenceChange = () => {
+        this.setState(this.getPreferences());
+    }
+
+    toggleDropdown = (e) => {
         e.preventDefault();
 
         this.refs.dropdown.toggleDropdown();
     }
 
-    render() {
-        var me = this.props.currentUser;
-        var profilePicture = null;
-
-        if (!me) {
+    renderStatusDropdown = () => {
+        if (this.state.isMobile) {
             return null;
         }
+        return (
+            <StatusDropdown/>
+        );
+    }
 
-        if (me.last_picture_update) {
-            profilePicture = (
-                <img
-                    className='user__picture'
-                    src={Client.getUsersRoute() + '/' + me.id + '/image?time=' + me.last_picture_update}
-                />
-            );
-        }
+    render() {
+        const statusDropdown = this.renderStatusDropdown();
 
         let tutorialTip = null;
         if (this.state.showTutorialTip) {
@@ -105,7 +85,7 @@ export default class SidebarHeader extends React.Component {
                 <div className='team__name'>{this.props.teamDisplayName}</div>
             );
         } else {
-            teamNameWithToolTip = ( 
+            teamNameWithToolTip = (
                 <OverlayTrigger
                     trigger={['hover', 'focus']}
                     delayShow={Constants.OVERLAY_TIME_DELAY}
@@ -117,20 +97,23 @@ export default class SidebarHeader extends React.Component {
                 </OverlayTrigger>
             );
         }
-				
-				var username = this.props.currentUser.username;
-				if(username.includes("guest")) {
-					//alert('i think you may be a guest');
-					 changeCss('.ps-container','display:none!important;');
-					 changeCss('.sidebar--left','width:0px!important;');
-					 changeCss('.channel-header.alt','display:none!important;');
-					 changeCss('.app__content','margin-left:0px!important;');
-				} // end if
-					
 
-				//Kerauno Chat - Removed Team Header
         return (
-					<span></span>
+            <div className='team__header theme'>
+                {tutorialTip}
+                <div className='header__info'>
+                    {teamNameWithToolTip}
+                    <div className='user__name'>{'@' + this.props.currentUser.username}</div>
+                </div>
+                <SidebarHeaderDropdown
+                    ref='dropdown'
+                    teamType={this.props.teamType}
+                    teamDisplayName={this.props.teamDisplayName}
+                    teamName={this.props.teamName}
+                    currentUser={this.props.currentUser}
+                />
+                {statusDropdown}
+            </div>
         );
     }
 }
@@ -141,9 +124,9 @@ SidebarHeader.defaultProps = {
     teamType: ''
 };
 SidebarHeader.propTypes = {
-    teamDisplayName: React.PropTypes.string,
-    teamDescription: React.PropTypes.string,
-    teamName: React.PropTypes.string,
-    teamType: React.PropTypes.string,
-    currentUser: React.PropTypes.object
+    teamDisplayName: PropTypes.string,
+    teamDescription: PropTypes.string,
+    teamName: PropTypes.string,
+    teamType: PropTypes.string,
+    currentUser: PropTypes.object
 };

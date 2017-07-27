@@ -42,7 +42,8 @@ func WriteSamlFile(fileData *multipart.FileHeader) *model.AppError {
 		return model.NewLocAppError("AddSamlCertificate", "api.admin.add_certificate.open.app_error", nil, err.Error())
 	}
 
-	out, err := os.Create(utils.FindDir("config") + filename)
+	configDir, _ := utils.FindDir("config")
+	out, err := os.Create(configDir + filename)
 	if err != nil {
 		return model.NewLocAppError("AddSamlCertificate", "api.admin.add_certificate.saving.app_error", nil, err.Error())
 	}
@@ -67,7 +68,6 @@ func AddSamlPublicCertificate(fileData *multipart.FileHeader) *model.AppError {
 	}
 
 	utils.SaveConfig(utils.CfgFileName, cfg)
-	utils.LoadConfig(utils.CfgFileName)
 
 	return nil
 }
@@ -87,7 +87,6 @@ func AddSamlPrivateCertificate(fileData *multipart.FileHeader) *model.AppError {
 	}
 
 	utils.SaveConfig(utils.CfgFileName, cfg)
-	utils.LoadConfig(utils.CfgFileName)
 
 	return nil
 }
@@ -107,7 +106,6 @@ func AddSamlIdpCertificate(fileData *multipart.FileHeader) *model.AppError {
 	}
 
 	utils.SaveConfig(utils.CfgFileName, cfg)
-	utils.LoadConfig(utils.CfgFileName)
 
 	return nil
 }
@@ -143,7 +141,6 @@ func RemoveSamlPublicCertificate() *model.AppError {
 	}
 
 	utils.SaveConfig(utils.CfgFileName, cfg)
-	utils.LoadConfig(utils.CfgFileName)
 
 	return nil
 }
@@ -164,7 +161,6 @@ func RemoveSamlPrivateCertificate() *model.AppError {
 	}
 
 	utils.SaveConfig(utils.CfgFileName, cfg)
-	utils.LoadConfig(utils.CfgFileName)
 
 	return nil
 }
@@ -185,7 +181,6 @@ func RemoveSamlIdpCertificate() *model.AppError {
 	}
 
 	utils.SaveConfig(utils.CfgFileName, cfg)
-	utils.LoadConfig(utils.CfgFileName)
 
 	return nil
 }

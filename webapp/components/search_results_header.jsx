@@ -7,6 +7,8 @@ import * as GlobalActions from 'actions/global_actions.jsx';
 
 import {FormattedMessage} from 'react-intl';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 
 export default class SearchResultsHeader extends React.Component {
@@ -102,6 +104,7 @@ export default class SearchResultsHeader extends React.Component {
                         onClick={this.toggleSize}
                     >
                         <OverlayTrigger
+                            trigger={['hover', 'focus']}
                             delayShow={Constants.OVERLAY_TIME_DELAY}
                             placement='top'
                             overlay={expandSidebarTooltip}
@@ -109,6 +112,7 @@ export default class SearchResultsHeader extends React.Component {
                             <i className='fa fa-expand'/>
                         </OverlayTrigger>
                         <OverlayTrigger
+                            trigger={['hover', 'focus']}
                             delayShow={Constants.OVERLAY_TIME_DELAY}
                             placement='top'
                             overlay={shrinkSidebarTooltip}
@@ -124,6 +128,7 @@ export default class SearchResultsHeader extends React.Component {
                         onClick={this.handleClose}
                     >
                         <OverlayTrigger
+                            trigger={['hover', 'focus']}
                             delayShow={Constants.OVERLAY_TIME_DELAY}
                             placement='top'
                             overlay={closeSidebarTooltip}
@@ -138,10 +143,10 @@ export default class SearchResultsHeader extends React.Component {
 }
 
 SearchResultsHeader.propTypes = {
-    isMentionSearch: React.PropTypes.bool,
-    toggleSize: React.PropTypes.func,
-    shrink: React.PropTypes.func,
-    isFlaggedPosts: React.PropTypes.bool,
-    isPinnedPosts: React.PropTypes.bool,
-    channelDisplayName: React.PropTypes.string.isRequired
+    isMentionSearch: PropTypes.bool,
+    toggleSize: PropTypes.func,
+    shrink: PropTypes.func,
+    isFlaggedPosts: PropTypes.bool,
+    isPinnedPosts: PropTypes.bool,
+    channelDisplayName: PropTypes.string.isRequired
 };

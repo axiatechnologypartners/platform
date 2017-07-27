@@ -97,7 +97,8 @@ class InviteMemberModal extends React.Component {
 
     handleToggle(value) {
         this.setState({
-            show: value
+            show: value,
+            serverError: null
         });
     }
 
@@ -517,7 +518,7 @@ class InviteMemberModal extends React.Component {
                     <ConfirmModal
                         title={formatMessage(holders.modalTitle)}
                         message={formatMessage(holders.modalMessage)}
-                        confirmButton={formatMessage(holders.modalButton)}
+                        confirmButtonText={formatMessage(holders.modalButton)}
                         show={this.state.showConfirmModal}
                         onConfirm={this.handleHide.bind(this, false)}
                         onCancel={() => this.setState({showConfirmModal: false})}

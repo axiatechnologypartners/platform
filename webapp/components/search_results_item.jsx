@@ -1,28 +1,23 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
-import $ from 'jquery';
-import PostMessageContainer from 'components/post_view/components/post_message_container.jsx';
+import PostMessageContainer from 'components/post_view/post_message_view';
 import UserProfile from './user_profile.jsx';
-import FileAttachmentListContainer from './file_attachment_list_container.jsx';
+import FileAttachmentListContainer from 'components/file_attachment_list';
 import ProfilePicture from './profile_picture.jsx';
 import CommentIcon from 'components/common/comment_icon.jsx';
+import DotMenu from 'components/dot_menu';
+import PostFlagIcon from 'components/post_view/post_flag_icon.jsx';
 
 import TeamStore from 'stores/team_store.jsx';
-import UserStore from 'stores/user_store.jsx';
 
-import AppDispatcher from '../dispatcher/app_dispatcher.jsx';
 import * as GlobalActions from 'actions/global_actions.jsx';
-import {flagPost, unflagPost} from 'actions/post_actions.jsx';
-import PostFlagIcon from 'components/common/post_flag_icon.jsx';
-
 import * as Utils from 'utils/utils.jsx';
 import * as PostUtils from 'utils/post_utils.jsx';
-
 import Constants from 'utils/constants.jsx';
-const ActionTypes = Constants.ActionTypes;
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {FormattedMessage, FormattedDate} from 'react-intl';
 import {browserHistory, Link} from 'react-router/es6';
 
@@ -31,15 +26,32 @@ export default class SearchResultsItem extends React.Component {
         super(props);
 
         this.handleFocusRHSClick = this.handleFocusRHSClick.bind(this);
+        this.handleJumpClick = this.handleJumpClick.bind(this);
+        this.handleDropdownOpened = this.handleDropdownOpened.bind(this);
         this.shrinkSidebar = this.shrinkSidebar.bind(this);
-        this.unflagPost = this.unflagPost.bind(this);
-        this.flagPost = this.flagPost.bind(this);
 
         this.state = {
             currentTeamDisplayName: TeamStore.getCurrent().name,
             width: '',
-            height: ''
+            height: '',
+            dropdownOpened: false
         };
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!Utils.areObjectsEqual(nextState.post, this.props.post)) {
+            return true;
+        }
+
+        if (nextProps.isFlagged !== this.props.isFlagged) {
+            return true;
+        }
+
+        if (nextState.dropdownOpened !== this.state.dropdownOpened) {
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount() {
@@ -54,10 +66,6 @@ export default class SearchResultsItem extends React.Component {
         });
     }
 
-    hideSidebar() {
-        $('.sidebar--right').removeClass('move--left');
-    }
-
     shrinkSidebar() {
         setTimeout(() => {
             this.props.shrink();
@@ -69,14 +77,19 @@ export default class SearchResultsItem extends React.Component {
         GlobalActions.emitPostFocusRightHandSideFromSearch(this.props.post, this.props.isMentionSearch);
     }
 
-    flagPost(e) {
-        e.preventDefault();
-        flagPost(this.props.post.id);
+    handleJumpClick() {
+        if (Utils.isMobile()) {
+            GlobalActions.toggleSideBarAction(false);
+        }
+
+        this.shrinkSidebar();
+        browserHistory.push(TeamStore.getCurrentTeamRelativeUrl() + '/pl/' + this.props.post.id);
     }
 
-    unflagPost(e) {
-        e.preventDefault();
-        unflagPost(this.props.post.id);
+    handleDropdownOpened = (isOpened) => {
+        this.setState({
+            dropdownOpened: isOpened
+        });
     }
 
     timeTag(post) {
@@ -109,10 +122,23 @@ export default class SearchResultsItem extends React.Component {
             );
     }
 
+    getClassName = () => {
+        let className = 'post post--thread';
+
+        if (this.props.compactDisplay) {
+            className = ' post--compact';
+        }
+
+        if (this.state.dropdownOpened) {
+            className += ' post--hovered';
+        }
+
+        return className;
+    }
+
     render() {
         let channelName = null;
         const channel = this.props.channel;
-        const timestamp = UserStore.getCurrentUser().last_picture_update;
         const user = this.props.user || {};
         const post = this.props.post;
 
@@ -148,12 +174,12 @@ export default class SearchResultsItem extends React.Component {
 
         let botIndicator;
         if (post.props && post.props.from_webhook) {
-            botIndicator = <li className='bot-indicator'>{Constants.BOT_NAME}</li>;
+            botIndicator = <div className='bot-indicator'>{Constants.BOT_NAME}</div>;
         }
 
         const profilePic = (
             <ProfilePicture
-                src={PostUtils.getProfilePicSrcForPost(post, timestamp)}
+                src={PostUtils.getProfilePicSrcForPost(post, user)}
                 user={this.props.user}
                 status={this.props.status}
                 isBusy={this.props.isBusy}
@@ -161,10 +187,11 @@ export default class SearchResultsItem extends React.Component {
 
         );
 
-        let compactClass = '';
         const profilePicContainer = (<div className='post__img'>{profilePic}</div>);
-        if (this.props.compactDisplay) {
-            compactClass = 'post--compact';
+
+        let postClass = '';
+        if (PostUtils.isEdited(this.props.post)) {
+            postClass += ' post--edited';
         }
 
         let fileAttachment = null;
@@ -200,7 +227,14 @@ export default class SearchResultsItem extends React.Component {
             );
 
             rhsControls = (
-                <li className='col__controls'>
+                <div className='col__controls'>
+                    <DotMenu
+                        idPrefix={Constants.SEARCH_POST}
+                        idCount={idCount}
+                        post={post}
+                        isFlagged={this.props.isFlagged}
+                        handleDropdownOpened={this.handleDropdownOpened}
+                    />
                     <CommentIcon
                         idPrefix={'searchCommentIcon'}
                         idCount={idCount}
@@ -208,32 +242,7 @@ export default class SearchResultsItem extends React.Component {
                         searchStyle={'search-item__comment'}
                     />
                     <a
-                        onClick={
-                            () => {
-                                if (Utils.isMobile()) {
-                                    AppDispatcher.handleServerAction({
-                                        type: ActionTypes.RECEIVED_SEARCH,
-                                        results: null
-                                    });
-
-                                    AppDispatcher.handleServerAction({
-                                        type: ActionTypes.RECEIVED_SEARCH_TERM,
-                                        term: null,
-                                        do_search: false,
-                                        is_mention_search: false
-                                    });
-
-                                    AppDispatcher.handleServerAction({
-                                        type: ActionTypes.RECEIVED_POST_SELECTED,
-                                        postId: null
-                                    });
-
-                                    this.hideSidebar();
-                                }
-                                this.shrinkSidebar();
-                                browserHistory.push(TeamStore.getCurrentTeamRelativeUrl() + '/pl/' + post.id);
-                            }
-                        }
+                        onClick={this.handleJumpClick}
                         className='search-item__jump'
                     >
                         <FormattedMessage
@@ -241,7 +250,7 @@ export default class SearchResultsItem extends React.Component {
                             defaultMessage='Jump'
                         />
                     </a>
-                </li>
+                </div>
             );
 
             message = (
@@ -280,34 +289,36 @@ export default class SearchResultsItem extends React.Component {
                         />
                     </div>
                 </div>
-                <div
-                    className={'post post--thread ' + compactClass}
-                >
+                <div className={this.getClassName()}>
                     <div className='search-channel__name'>{channelName}</div>
                     <div className='post__content'>
                         {profilePicContainer}
                         <div>
-                            <ul className='post__header'>
-                                <li className='col col__name'><strong>
-                                    <UserProfile
-                                        user={user}
-                                        overwriteName={overrideUsername}
-                                        disablePopover={disableProfilePopover}
-                                        status={this.props.status}
-                                        isBusy={this.props.isBusy}
-                                    />
-                                </strong></li>
+                            <div className='post__header'>
+                                <div className='col col__name'>
+                                    <strong>
+                                        <UserProfile
+                                            user={user}
+                                            overwriteName={overrideUsername}
+                                            disablePopover={disableProfilePopover}
+                                            status={this.props.status}
+                                            isBusy={this.props.isBusy}
+                                        />
+                                    </strong>
+                                </div>
                                 {botIndicator}
-                                <li className='col'>
+                                <div className='col'>
                                     {this.renderTimeTag(post)}
                                     {pinnedBadge}
                                     {flagContent}
-                                </li>
+                                </div>
                                 {rhsControls}
-                            </ul>
+                            </div>
                             <div className='search-item-snippet post__body'>
-                                {message}
-                                {fileAttachment}
+                                <div className={postClass}>
+                                    {message}
+                                    {fileAttachment}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -318,17 +329,17 @@ export default class SearchResultsItem extends React.Component {
 }
 
 SearchResultsItem.propTypes = {
-    post: React.PropTypes.object,
-    lastPostCount: React.PropTypes.number,
-    user: React.PropTypes.object,
-    channel: React.PropTypes.object,
-    compactDisplay: React.PropTypes.bool,
-    isMentionSearch: React.PropTypes.bool,
-    isFlaggedSearch: React.PropTypes.bool,
-    term: React.PropTypes.string,
-    useMilitaryTime: React.PropTypes.bool.isRequired,
-    shrink: React.PropTypes.func,
-    isFlagged: React.PropTypes.bool,
-    isBusy: React.PropTypes.bool,
-    status: React.PropTypes.string
+    post: PropTypes.object,
+    lastPostCount: PropTypes.number,
+    user: PropTypes.object,
+    channel: PropTypes.object,
+    compactDisplay: PropTypes.bool,
+    isMentionSearch: PropTypes.bool,
+    isFlaggedSearch: PropTypes.bool,
+    term: PropTypes.string,
+    useMilitaryTime: PropTypes.bool.isRequired,
+    shrink: PropTypes.func,
+    isFlagged: PropTypes.bool,
+    isBusy: PropTypes.bool,
+    status: PropTypes.string
 };

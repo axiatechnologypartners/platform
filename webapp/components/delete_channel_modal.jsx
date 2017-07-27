@@ -8,6 +8,8 @@ import {FormattedMessage} from 'react-intl';
 
 import {browserHistory} from 'react-router/es6';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 
 import {deleteChannel} from 'actions/channel_actions.jsx';
@@ -31,6 +33,7 @@ export default class DeleteChannelModal extends React.Component {
 
         browserHistory.push(TeamStore.getCurrentTeamRelativeUrl() + '/channels/town-square');
         deleteChannel(this.props.channel.id);
+        this.onHide();
     }
 
     onHide() {
@@ -99,6 +102,6 @@ export default class DeleteChannelModal extends React.Component {
 }
 
 DeleteChannelModal.propTypes = {
-    onHide: React.PropTypes.func.isRequired,
-    channel: React.PropTypes.object.isRequired
+    onHide: PropTypes.func.isRequired,
+    channel: PropTypes.object.isRequired
 };

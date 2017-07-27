@@ -11,8 +11,10 @@ import UserStore from 'stores/user_store.jsx';
 import TeamStore from 'stores/team_store.jsx';
 
 import Constants from 'utils/constants.jsx';
-import {displayUsernameForUser} from 'utils/utils.jsx';
-import Client from 'client/web_client.jsx';
+import {displayEntireNameForUser} from 'utils/utils.jsx';
+import {Client4} from 'mattermost-redux/client';
+
+import PropTypes from 'prop-types';
 
 import React from 'react';
 import {Modal} from 'react-bootstrap';
@@ -27,11 +29,11 @@ const MAX_SELECTABLE_VALUES = Constants.MAX_USERS_IN_GM - 1;
 
 export default class MoreDirectChannels extends React.Component {
     static propTypes = {
-        startingUsers: React.PropTypes.arrayOf(React.PropTypes.object),
-        onModalDismissed: React.PropTypes.func,
-        actions: React.PropTypes.shape({
-            getProfiles: React.PropTypes.func.isRequired,
-            getProfilesInTeam: React.PropTypes.func.isRequired
+        startingUsers: PropTypes.arrayOf(PropTypes.object),
+        onModalDismissed: PropTypes.func,
+        actions: PropTypes.shape({
+            getProfiles: PropTypes.func.isRequired,
+            getProfilesInTeam: PropTypes.func.isRequired
         }).isRequired
     }
 
@@ -183,11 +185,18 @@ export default class MoreDirectChannels extends React.Component {
         }
     }
 
+    resetPaging = () => {
+        if (this.refs.multiselect) {
+            this.refs.multiselect.resetPaging();
+        }
+    }
+
     search(term) {
         clearTimeout(this.searchTimeoutId);
         this.term = term;
 
         if (term === '') {
+            this.resetPaging();
             this.onChange();
             return;
         }
@@ -201,7 +210,7 @@ export default class MoreDirectChannels extends React.Component {
 
         this.searchTimeoutId = setTimeout(
             () => {
-                searchUsers(term, teamId);
+                searchUsers(term, teamId, {}, this.resetPaging);
             },
             Constants.SEARCH_TIMEOUT_MILLISECONDS
         );
@@ -225,7 +234,7 @@ export default class MoreDirectChannels extends React.Component {
                 onClick={() => onAdd(option)}
             >
                 <ProfilePicture
-                    src={`${Client.getUsersRoute()}/${option.id}/image?time=${option.last_picture_update}`}
+                    src={Client4.getProfilePictureUrl(option.id, option.last_picture_update)}
                     status={`${UserStore.getStatus(option.id)}`}
                     width='32'
                     height='32'
@@ -234,7 +243,7 @@ export default class MoreDirectChannels extends React.Component {
                     className='more-modal__details'
                 >
                     <div className='more-modal__name'>
-                        {displayUsernameForUser(option)}
+                        {displayEntireNameForUser(option)}
                     </div>
                     <div className='more-modal__description'>
                         {option.email}
@@ -283,12 +292,17 @@ export default class MoreDirectChannels extends React.Component {
         const numRemainingText = (
             <FormattedMessage
                 id='multiselect.numPeopleRemaining'
-                defaultMessage='You can add {num, number} more {num, plural, =0 {people} one {person} other {people}}. '
+                defaultMessage='Use ↑↓ to browse, ↵ to select. You can add {num, number} more {num, plural, one {person} other {people}}. '
                 values={{
                     num: MAX_SELECTABLE_VALUES - this.state.values.length
                 }}
             />
         );
+
+        let users = [];
+        if (this.state.users) {
+            users = this.state.users.filter((user) => user.delete_at === 0);
+        }
 
         return (
             <Modal
@@ -308,7 +322,8 @@ export default class MoreDirectChannels extends React.Component {
                 <Modal.Body>
                     <MultiSelect
                         key='moreDirectChannelsList'
-                        options={this.state.users}
+                        ref='multiselect'
+                        options={users}
                         optionRenderer={this.renderOption}
                         values={this.state.values}
                         valueRenderer={this.renderValue}

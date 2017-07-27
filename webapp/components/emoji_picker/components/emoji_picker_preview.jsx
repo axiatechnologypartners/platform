@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 // Copyright (c) 2016-present Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
@@ -9,7 +11,7 @@ import {FormattedMessage} from 'react-intl';
 
 export default class EmojiPickerPreview extends React.Component {
     static propTypes = {
-        emoji: React.PropTypes.object
+        emoji: PropTypes.object
     }
 
     render() {
@@ -25,7 +27,7 @@ export default class EmojiPickerPreview extends React.Component {
                 name = emoji.aliases[0];
                 aliases = emoji.aliases;
                 previewImage = (<span className='sprite-preview'><img
-                    src='/static/emoji/img_trans.gif'
+                    src='/static/images/img_trans.gif'
                     className={'  emojisprite-preview emoji-' + emoji.filename + ' '}
                                                                  /></span>);
             } else {

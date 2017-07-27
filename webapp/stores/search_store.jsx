@@ -98,7 +98,7 @@ class SearchStoreClass extends EventEmitter {
         return this.searchTerm;
     }
 
-    storeSearchResults(results, isMentionSearch, isFlaggedPosts, isPinnedPosts) {
+    storeSearchResults(results, isMentionSearch = false, isFlaggedPosts = false, isPinnedPosts = false) {
         this.searchResults = results;
         this.isMentionSearch = isMentionSearch;
         this.isFlaggedPosts = isFlaggedPosts;
@@ -117,6 +117,17 @@ class SearchStoreClass extends EventEmitter {
                 state: Constants.POST_DELETED,
                 file_ids: []
             });
+        }
+    }
+
+    updatePost(post) {
+        const results = this.getSearchResults();
+        if (results == null) {
+            return;
+        }
+
+        if (post.id in results.posts) {
+            results.posts[post.id] = Object.assign({}, post);
         }
     }
 
@@ -176,12 +187,16 @@ SearchStore.dispatchToken = AppDispatcher.register((payload) => {
         SearchStore.deletePost(action.post);
         SearchStore.emitSearchChange();
         break;
+    case ActionTypes.POST_UPDATED:
+        SearchStore.updatePost(action.post);
+        SearchStore.emitSearchChange();
+        break;
     case ActionTypes.RECEIVED_POST_PINNED:
-        SearchStore.togglePinPost(action.reaction, true);
+        SearchStore.togglePinPost(action.postId, true);
         SearchStore.emitSearchChange();
         break;
     case ActionTypes.RECEIVED_POST_UNPINNED:
-        SearchStore.togglePinPost(action.reaction, false);
+        SearchStore.togglePinPost(action.postId, false);
         SearchStore.emitSearchChange();
         break;
     case ActionTypes.REMOVE_POST:

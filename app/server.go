@@ -13,13 +13,14 @@ import (
 	l4g "github.com/alecthomas/log4go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/mattermost/platform/model"
-	"github.com/mattermost/platform/store"
-	"github.com/mattermost/platform/utils"
 	"github.com/rsc/letsencrypt"
 	"github.com/tylerb/graceful"
 	"gopkg.in/throttled/throttled.v2"
 	"gopkg.in/throttled/throttled.v2/store/memstore"
+
+	"github.com/mattermost/platform/model"
+	"github.com/mattermost/platform/store"
+	"github.com/mattermost/platform/utils"
 )
 
 type Server struct {
@@ -38,15 +39,22 @@ var allowedMethods []string = []string{
 	"DELETE",
 }
 
+type RecoveryLogger struct {
+}
+
+func (rl *RecoveryLogger) Println(i ...interface{}) {
+	l4g.Error("Please check the std error output for the stack trace")
+	l4g.Error(i)
+}
+
 type CorsWrapper struct {
 	router *mux.Router
 }
 
 func (cw *CorsWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(*utils.Cfg.ServiceSettings.AllowCorsFrom) > 0 {
-		origin := r.Header.Get("Origin")
-		if *utils.Cfg.ServiceSettings.AllowCorsFrom == "*" || strings.Contains(*utils.Cfg.ServiceSettings.AllowCorsFrom, origin) {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
+		if utils.OriginChecker(r) {
+			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 
 			if r.Method == "OPTIONS" {
 				w.Header().Set(
@@ -78,7 +86,7 @@ func NewServer() {
 }
 
 func InitStores() {
-	Srv.Store = store.NewSqlStore()
+	Srv.Store = store.NewLayeredStore()
 }
 
 type VaryBy struct{}
@@ -158,7 +166,7 @@ func StartServer() {
 		Timeout: TIME_TO_WAIT_FOR_CONNECTIONS_TO_CLOSE_ON_SERVER_SHUTDOWN,
 		Server: &http.Server{
 			Addr:         utils.Cfg.ServiceSettings.ListenAddress,
-			Handler:      handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler),
+			Handler:      handlers.RecoveryHandler(handlers.RecoveryLogger(&RecoveryLogger{}), handlers.PrintRecoveryStack(true))(handler),
 			ReadTimeout:  time.Duration(*utils.Cfg.ServiceSettings.ReadTimeout) * time.Second,
 			WriteTimeout: time.Duration(*utils.Cfg.ServiceSettings.WriteTimeout) * time.Second,
 		},

@@ -55,13 +55,8 @@ func CreateTeamWithUser(team *model.Team, userId string) (*model.Team, *model.Ap
 	return rteam, nil
 }
 
-func isTeamEmailAllowed(user *model.User) bool {
-	email := strings.ToLower(user.Email)
-
-	if len(user.AuthService) > 0 && len(*user.AuthData) > 0 {
-		return true
-	}
-
+func isTeamEmailAddressAllowed(email string) bool {
+	email = strings.ToLower(email)
 	// commas and @ signs are optional
 	// can be in the form of "@corp.mattermost.com, mattermost.com mattermost.org" -> corp.mattermost.com mattermost.com mattermost.org
 	domains := strings.Fields(strings.TrimSpace(strings.ToLower(strings.Replace(strings.Replace(utils.Cfg.TeamSettings.RestrictCreationToDomains, "@", " ", -1), ",", " ", -1))))
@@ -79,6 +74,16 @@ func isTeamEmailAllowed(user *model.User) bool {
 	}
 
 	return true
+}
+
+func isTeamEmailAllowed(user *model.User) bool {
+	email := strings.ToLower(user.Email)
+
+	if len(user.AuthService) > 0 && len(*user.AuthData) > 0 {
+		return true
+	}
+
+	return isTeamEmailAddressAllowed(email)
 }
 
 func UpdateTeam(team *model.Team) (*model.Team, *model.AppError) {
@@ -159,7 +164,16 @@ func UpdateTeamMemberRoles(teamId string, userId string, newRoles string) (*mode
 
 	ClearSessionCacheForUser(userId)
 
+	sendUpdatedMemberRoleEvent(userId, member)
+
 	return member, nil
+}
+
+func sendUpdatedMemberRoleEvent(userId string, member *model.TeamMember) {
+	message := model.NewWebSocketEvent(model.WEBSOCKET_EVENT_MEMBERROLE_UPDATED, "", "", userId, nil)
+	message.Add("member", member.ToJson())
+
+	go Publish(message)
 }
 
 func AddUserToTeam(teamId string, userId string, userRequestorId string) (*model.Team, *model.AppError) {
@@ -199,12 +213,12 @@ func AddUserToTeamByHash(userId string, hash string, data string) (*model.Team, 
 	props := model.MapFromJson(strings.NewReader(data))
 
 	if hash != utils.HashSha256(fmt.Sprintf("%v:%v", data, utils.Cfg.EmailSettings.InviteSalt)) {
-		return nil, model.NewLocAppError("JoinUserToTeamByHash", "api.user.create_user.signup_link_invalid.app_error", nil, "")
+		return nil, model.NewAppError("JoinUserToTeamByHash", "api.user.create_user.signup_link_invalid.app_error", nil, "", http.StatusBadRequest)
 	}
 
 	t, timeErr := strconv.ParseInt(props["time"], 10, 64)
 	if timeErr != nil || model.GetMillis()-t > 1000*60*60*48 { // 48 hours
-		return nil, model.NewLocAppError("JoinUserToTeamByHash", "api.user.create_user.signup_link_expired.app_error", nil, "")
+		return nil, model.NewAppError("JoinUserToTeamByHash", "api.user.create_user.signup_link_expired.app_error", nil, "", http.StatusBadRequest)
 	}
 
 	tchan := Srv.Store.Team().Get(props["id"])
@@ -621,6 +635,20 @@ func InviteNewUsersToTeam(emailList []string, teamId, senderId string) *model.Ap
 		return err
 	}
 
+	var invalidEmailList []string
+
+	for _, email := range emailList {
+		if ! isTeamEmailAddressAllowed(email) {
+			invalidEmailList = append(invalidEmailList, email)
+		}
+	}
+
+	if len(invalidEmailList) > 0 {
+		s := strings.Join(invalidEmailList, ", ")
+		err := model.NewAppError("InviteNewUsersToTeam", "api.team.invite_members.invalid_email.app_error", map[string]interface{}{"Addresses": s}, "", http.StatusBadRequest)
+		return err
+	}
+
 	tchan := Srv.Store.Team().Get(teamId)
 	uchan := Srv.Store.User().Get(senderId)
 
@@ -638,7 +666,8 @@ func InviteNewUsersToTeam(emailList []string, teamId, senderId string) *model.Ap
 		user = result.Data.(*model.User)
 	}
 
-	SendInviteEmails(team, user.GetDisplayName(), emailList, utils.GetSiteURL())
+	nameFormat := *utils.Cfg.TeamSettings.TeammateNameDisplay
+	SendInviteEmails(team, user.GetDisplayName(nameFormat), emailList, utils.GetSiteURL())
 
 	return nil
 }
@@ -656,7 +685,7 @@ func GetTeamsUnreadForUser(excludeTeamId string, userId string) ([]*model.TeamUn
 		return nil, result.Err
 	} else {
 		data := result.Data.([]*model.ChannelUnread)
-		var members []*model.TeamUnread
+		members := []*model.TeamUnread{}
 		membersMap := make(map[string]*model.TeamUnread)
 
 		unreads := func(cu *model.ChannelUnread, tu *model.TeamUnread) *model.TeamUnread {
@@ -688,6 +717,15 @@ func GetTeamsUnreadForUser(excludeTeamId string, userId string) ([]*model.TeamUn
 
 		return members, nil
 	}
+}
+
+func PermanentDeleteTeamId(teamId string) *model.AppError {
+	team, err := GetTeam(teamId)
+	if err != nil {
+		return err
+	}
+
+	return PermanentDeleteTeam(team)
 }
 
 func PermanentDeleteTeam(team *model.Team) *model.AppError {

@@ -4,7 +4,7 @@
 package app
 
 import (
-	"os"
+	"net/http"
 	"strings"
 
 	l4g "github.com/alecthomas/log4go"
@@ -23,28 +23,14 @@ func LoadLicense() {
 
 	if len(licenseId) != 26 {
 		// Lets attempt to load the file from disk since it was missing from the DB
-		fileName := utils.GetLicenseFileLocation(*utils.Cfg.ServiceSettings.LicenseFileLocation)
+		license, licenseBytes := utils.GetAndValidateLicenseFileFromDisk()
 
-		if _, err := os.Stat(fileName); err == nil {
-			l4g.Info("License key has not been uploaded.  Loading license key from disk at %v", fileName)
-			licenseBytes := utils.GetLicenseFileFromDisk(fileName)
-
-			if success, licenseStr := utils.ValidateLicense(licenseBytes); success {
-				licenseFileFromDisk := model.LicenseFromJson(strings.NewReader(licenseStr))
-				licenseId = licenseFileFromDisk.Id
-				if _, err := SaveLicense(licenseBytes); err != nil {
-					l4g.Info("Failed to save license key loaded from disk err=%v", err.Error())
-					return
-				}
+		if license != nil {
+			if _, err := SaveLicense(licenseBytes); err != nil {
+				l4g.Info("Failed to save license key loaded from disk err=%v", err.Error())
 			} else {
-				l4g.Error("Found license key at %v but it appears to be invalid.", fileName)
-				return
+				licenseId = license.Id
 			}
-
-		} else {
-			l4g.Info(utils.T("mattermost.load_license.find.warn"))
-			l4g.Debug("We could not find the license key in the database or on disk at %v", fileName)
-			return
 		}
 	}
 
@@ -64,17 +50,17 @@ func SaveLicense(licenseBytes []byte) (*model.License, *model.AppError) {
 		license = model.LicenseFromJson(strings.NewReader(licenseStr))
 
 		if result := <-Srv.Store.User().AnalyticsUniqueUserCount(""); result.Err != nil {
-			return nil, model.NewLocAppError("addLicense", "api.license.add_license.invalid_count.app_error", nil, result.Err.Error())
+			return nil, model.NewAppError("addLicense", "api.license.add_license.invalid_count.app_error", nil, result.Err.Error(), http.StatusBadRequest)
 		} else {
 			uniqueUserCount := result.Data.(int64)
 
 			if uniqueUserCount > int64(*license.Features.Users) {
-				return nil, model.NewLocAppError("addLicense", "api.license.add_license.unique_users.app_error", map[string]interface{}{"Users": *license.Features.Users, "Count": uniqueUserCount}, "")
+				return nil, model.NewAppError("addLicense", "api.license.add_license.unique_users.app_error", map[string]interface{}{"Users": *license.Features.Users, "Count": uniqueUserCount}, "", http.StatusBadRequest)
 			}
 		}
 
 		if ok := utils.SetLicense(license); !ok {
-			return nil, model.NewLocAppError("addLicense", model.EXPIRED_LICENSE_ERROR, nil, "")
+			return nil, model.NewAppError("addLicense", model.EXPIRED_LICENSE_ERROR, nil, "", http.StatusBadRequest)
 		}
 
 		record := &model.LicenseRecord{}
@@ -84,7 +70,7 @@ func SaveLicense(licenseBytes []byte) (*model.License, *model.AppError) {
 
 		if result := <-rchan; result.Err != nil {
 			RemoveLicense()
-			return nil, model.NewLocAppError("addLicense", "api.license.add_license.save.app_error", nil, "err="+result.Err.Error())
+			return nil, model.NewAppError("addLicense", "api.license.add_license.save.app_error", nil, "err="+result.Err.Error(), http.StatusInternalServerError)
 		}
 
 		sysVar := &model.System{}
@@ -94,10 +80,10 @@ func SaveLicense(licenseBytes []byte) (*model.License, *model.AppError) {
 
 		if result := <-schan; result.Err != nil {
 			RemoveLicense()
-			return nil, model.NewLocAppError("addLicense", "api.license.add_license.save_active.app_error", nil, "")
+			return nil, model.NewAppError("addLicense", "api.license.add_license.save_active.app_error", nil, "", http.StatusInternalServerError)
 		}
 	} else {
-		return nil, model.NewLocAppError("addLicense", model.INVALID_LICENSE_ERROR, nil, "")
+		return nil, model.NewAppError("addLicense", model.INVALID_LICENSE_ERROR, nil, "", http.StatusBadRequest)
 	}
 
 	ReloadConfig()

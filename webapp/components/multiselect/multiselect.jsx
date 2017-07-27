@@ -7,6 +7,8 @@ import {localizeMessage} from 'utils/utils.jsx';
 import Constants from 'utils/constants.jsx';
 const KeyCodes = Constants.KeyCodes;
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 import ReactSelect from 'react-select';
 import {FormattedMessage} from 'react-intl';
@@ -14,14 +16,6 @@ import {FormattedMessage} from 'react-intl';
 export default class MultiSelect extends React.Component {
     constructor(props) {
         super(props);
-
-        this.onChange = this.onChange.bind(this);
-        this.onSelect = this.onSelect.bind(this);
-        this.onAdd = this.onAdd.bind(this);
-        this.onInput = this.onInput.bind(this);
-        this.handleEnterPress = this.handleEnterPress.bind(this);
-        this.nextPage = this.nextPage.bind(this);
-        this.prevPage = this.prevPage.bind(this);
 
         this.selected = null;
 
@@ -39,7 +33,7 @@ export default class MultiSelect extends React.Component {
         document.removeEventListener('keydown', this.handleEnterPress);
     }
 
-    nextPage() {
+    nextPage = () => {
         if (this.props.handlePageChange) {
             this.props.handlePageChange(this.state.page + 1, this.state.page);
         }
@@ -47,7 +41,7 @@ export default class MultiSelect extends React.Component {
         this.setState({page: this.state.page + 1});
     }
 
-    prevPage() {
+    prevPage = () => {
         if (this.state.page === 0) {
             return;
         }
@@ -59,11 +53,15 @@ export default class MultiSelect extends React.Component {
         this.setState({page: this.state.page - 1});
     }
 
-    onSelect(selected) {
+    resetPaging = () => {
+        this.setState({page: 0});
+    }
+
+    onSelect = (selected) => {
         this.selected = selected;
     }
 
-    onAdd(value) {
+    onAdd = (value) => {
         if (this.props.maxValues && this.props.values.length >= this.props.maxValues) {
             return;
         }
@@ -81,7 +79,7 @@ export default class MultiSelect extends React.Component {
         this.refs.select.focus();
     }
 
-    onInput(input) {
+    onInput = (input) => {
         if (input === '') {
             this.refs.list.setSelected(-1);
         } else {
@@ -92,7 +90,7 @@ export default class MultiSelect extends React.Component {
         this.props.handleInput(input);
     }
 
-    handleEnterPress(e) {
+    handleEnterPress = (e) => {
         switch (e.keyCode) {
         case KeyCodes.ENTER:
             if (this.selected == null) {
@@ -104,7 +102,7 @@ export default class MultiSelect extends React.Component {
         }
     }
 
-    onChange(values) {
+    onChange = (values) => {
         if (values.length < this.props.values.length) {
             this.props.handleDelete(values);
         }
@@ -232,12 +230,6 @@ export default class MultiSelect extends React.Component {
                         </button>
                     </div>
                     <div className='multi-select__help'>
-                        <div className='hidden-xs'>
-                            <FormattedMessage
-                                id='multiselect.instructions'
-                                defaultMessage='Use up/down arrows to navigate and enter to select'
-                            />
-                        </div>
                         {numRemainingText}
                         {noteTextContainer}
                     </div>
@@ -262,18 +254,18 @@ export default class MultiSelect extends React.Component {
 }
 
 MultiSelect.propTypes = {
-    options: React.PropTypes.arrayOf(React.PropTypes.object),
-    optionRenderer: React.PropTypes.func,
-    values: React.PropTypes.arrayOf(React.PropTypes.object),
-    valueRenderer: React.PropTypes.func,
-    handleInput: React.PropTypes.func,
-    handleDelete: React.PropTypes.func,
-    perPage: React.PropTypes.number,
-    handlePageChange: React.PropTypes.func,
-    handleAdd: React.PropTypes.func,
-    handleSubmit: React.PropTypes.func,
-    noteText: React.PropTypes.node,
-    maxValues: React.PropTypes.number,
-    numRemainingText: React.PropTypes.node,
-    buttonSubmitText: React.PropTypes.node
+    options: PropTypes.arrayOf(PropTypes.object),
+    optionRenderer: PropTypes.func,
+    values: PropTypes.arrayOf(PropTypes.object),
+    valueRenderer: PropTypes.func,
+    handleInput: PropTypes.func,
+    handleDelete: PropTypes.func,
+    perPage: PropTypes.number,
+    handlePageChange: PropTypes.func,
+    handleAdd: PropTypes.func,
+    handleSubmit: PropTypes.func,
+    noteText: PropTypes.node,
+    maxValues: PropTypes.number,
+    numRemainingText: PropTypes.node,
+    buttonSubmitText: PropTypes.node
 };

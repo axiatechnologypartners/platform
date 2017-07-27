@@ -159,7 +159,8 @@ class ChannelStoreClass extends EventEmitter {
     setCurrentId(id) {
         store.dispatch({
             type: ChannelTypes.SELECT_CHANNEL,
-            data: id
+            data: id,
+            member: this.getMyMember(id)
         });
     }
 
@@ -447,7 +448,8 @@ class ChannelStoreClass extends EventEmitter {
 
     incrementMessages(id, markRead = false) {
         if (!this.unreadCounts[id]) {
-            return;
+            // Should never happen
+            console.log(`Missing channel_id=${id} in unreads object`); //eslint-disable-line no-console
         }
 
         const member = this.getMyMember(id);
@@ -482,11 +484,11 @@ class ChannelStoreClass extends EventEmitter {
         }
 
         if (!this.unreadCounts[id]) {
-            return;
+            // Should never happen
+            console.log(`Missing channel_id=${id} in unreads object`); //eslint-disable-line no-console
         }
 
         if (mentions.indexOf(UserStore.getCurrentId()) !== -1) {
-            this.unreadCounts[id].mentions++;
             const member = {...this.getMyMember(id)};
             member.mention_count++;
             store.dispatch({
@@ -560,7 +562,9 @@ ChannelStore.dispatchToken = AppDispatcher.register((payload) => {
         var markRead = id === ChannelStore.getCurrentId() && window.isActive;
 
         if (TeamStore.getCurrentId() === teamId || teamId === '') {
-            ChannelStore.incrementMentionsIfNeeded(id, action.websocketMessageProps);
+            if (!markRead) {
+                ChannelStore.incrementMentionsIfNeeded(id, action.websocketMessageProps);
+            }
             ChannelStore.incrementMessages(id, markRead);
         }
         break;

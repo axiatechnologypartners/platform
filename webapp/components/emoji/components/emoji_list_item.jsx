@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 // Copyright (c) 2016-present Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
@@ -13,10 +15,10 @@ import {FormattedMessage} from 'react-intl';
 export default class EmojiListItem extends React.Component {
     static get propTypes() {
         return {
-            emoji: React.PropTypes.object.isRequired,
-            onDelete: React.PropTypes.func.isRequired,
-            filter: React.PropTypes.string,
-            creator: React.PropTypes.object.isRequired
+            emoji: PropTypes.object.isRequired,
+            onDelete: PropTypes.func.isRequired,
+            filter: PropTypes.string,
+            creator: PropTypes.object.isRequired
         };
     }
 
@@ -39,13 +41,8 @@ export default class EmojiListItem extends React.Component {
             return true;
         }
 
-        if (creator) {
-            if (creator.username.toLowerCase().indexOf(filter) !== -1 ||
-                (creator.first_name && creator.first_name.toLowerCase().indexOf(filter) !== -1) ||
-                (creator.last_name && creator.last_name.toLowerCase().indexOf(filter) !== -1) ||
-                (creator.nickname && creator.nickname.toLowerCase().indexOf(filter) !== -1)) {
-                return true;
-            }
+        if (creator && creator.username && creator.username.toLowerCase().indexOf(filter) !== -1) {
+            return true;
         }
 
         return false;

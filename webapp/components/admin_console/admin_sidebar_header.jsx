@@ -4,9 +4,9 @@
 import $ from 'jquery';
 import AdminNavbarDropdown from './admin_navbar_dropdown.jsx';
 import UserStore from 'stores/user_store.jsx';
-import Client from 'client/web_client.jsx'; 
+import {Client4} from 'mattermost-redux/client';
 
-import {FormattedMessage} from 'react-intl'; 
+import {FormattedMessage} from 'react-intl';
 
 import React from 'react';
 
@@ -14,12 +14,10 @@ export default class SidebarHeader extends React.Component {
     constructor(props) {
         super(props);
 
-        this.toggleDropdown = this.toggleDropdown.bind(this);
-
         this.state = {};
     }
 
-    toggleDropdown(e) {
+    toggleDropdown = (e) => {
         e.preventDefault();
 
         if (this.refs.dropdown.blockToggle) {
@@ -42,14 +40,30 @@ export default class SidebarHeader extends React.Component {
             profilePicture = (
                 <img
                     className='user__picture'
-                    src={Client.getUsersRoute() + '/' + me.id + '/image?time=' + me.last_picture_update}
+                    src={Client4.getProfilePictureUrl(me.id, me.last_picture_update)}
                 />
             );
         }
 
-	//Kerauno Chat - Removed Team Header
         return (
-					<span></span>
+            <div className='team__header theme'>
+                <a
+                    href='#'
+                    onClick={this.toggleDropdown}
+                >
+                    {profilePicture}
+                    <div className='header__info'>
+                        <div className='team__name'>
+                            <FormattedMessage
+                                id='admin.sidebarHeader.systemConsole'
+                                defaultMessage='System Console'
+                            />
+                        </div>
+                        <div className='user__name'>{'@' + me.username}</div>
+                    </div>
+                </a>
+                <AdminNavbarDropdown ref='dropdown'/>
+            </div>
         );
     }
 }

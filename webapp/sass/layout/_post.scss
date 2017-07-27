@@ -237,6 +237,26 @@
         display: none;
     }
 
+    .post-list__loading {
+        @include opacity(.5);
+        font-size: .9em;
+        font-style: italic;
+        padding: 1em 0;
+        text-align: center;
+
+        i {
+            margin-right: 2px;
+        }
+
+        &.post-list__loading-search {
+            cursor: pointer;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
     .post-list-holder-by-time {
         -webkit-overflow-scrolling: touch;
         background: #ffffff;
@@ -392,6 +412,12 @@
         &.custom-textarea--emoji-picker {
             padding-right: 60px;
         }
+    }
+
+    .emoji-picker {
+        position: absolute;
+        top: -361px;
+        right: 0px;
     }
 
     .post-create.scroll {
@@ -879,6 +905,10 @@
         }
     }
 
+    .emoticon {
+        vertical-align: top;
+    }
+
     p {
         font-size: 13.5px;
         line-height: 1.6em;
@@ -1029,11 +1059,10 @@
     }
 
     .post__header {
-        list-style: none;
         margin-bottom: 2px;
         padding: 0;
 
-        li {
+        > div {
             display: inline-block;
             vertical-align: top;
         }
@@ -1193,7 +1222,7 @@
         }
 
         p + p {
-            margin: 1.2em 0 0;
+            margin: 0.5em 0 0;
         }
 
         img {
@@ -1203,7 +1232,8 @@
         ul,
         ol {
             font-size: 13.5px;
-            margin-bottom: .4em;
+            margin-bottom: .11em;
+            margin-top: 3px;
             padding-left: 20px;
 
             p {
@@ -1255,12 +1285,12 @@
 
         ul + p,
         ol + p {
-            margin-top: 1em;
+            margin-top: .6em;
         }
 
         p + ul,
         p + ol {
-            margin-top: 1em;
+            margin-top: .6em;
         }
 
         .pending-post-actions {
@@ -1352,6 +1382,12 @@
         &[data-expanded='true']:before {
             content: '\f066';
         }
+    }
+
+    .post__visibility {
+        @include opacity(.6);
+        font-size: .9em;
+        padding: 8px;
     }
 
     .post__time {
@@ -1458,14 +1494,19 @@
 
     .flag-icon__container {
         display: inline-block;
-        font-size: 12px;
+        height: 15px;
         margin-left: 7px;
         position: relative;
-        top: 1px;
+        top: 2px;
+        vertical-align: top;
         visibility: hidden;
 
         &.visible {
             visibility: visible;
+        }
+
+        svg {
+            width: 12px;
         }
 
         path {

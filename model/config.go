@@ -6,6 +6,7 @@ package model
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"net/url"
 )
 
@@ -37,6 +38,10 @@ const (
 
 	DIRECT_MESSAGE_ANY  = "any"
 	DIRECT_MESSAGE_TEAM = "team"
+
+	SHOW_USERNAME          = "username"
+	SHOW_NICKNAME_FULLNAME = "nickname_full_name"
+	SHOW_FULLNAME          = "full_name"
 
 	PERMISSIONS_ALL           = "all"
 	PERMISSIONS_CHANNEL_ADMIN = "channel_admin"
@@ -110,6 +115,9 @@ const (
 	WEBRTC_SETTINGS_DEFAULT_TURN_URI = ""
 
 	ANALYTICS_SETTINGS_DEFAULT_MAX_USERS_FOR_STATISTICS = 2500
+
+	ANNOUNCEMENT_SETTINGS_DEFAULT_BANNER_COLOR      = "#f2a93b"
+	ANNOUNCEMENT_SETTINGS_DEFAULT_BANNER_TEXT_COLOR = "#333333"
 )
 
 type ServiceSettings struct {
@@ -125,6 +133,7 @@ type ServiceSettings struct {
 	ReadTimeout                              *int
 	WriteTimeout                             *int
 	MaximumLoginAttempts                     int
+	GoroutineHealthThreshold                 *int
 	GoogleDeveloperKey                       string
 	EnableOAuthServiceProvider               bool
 	EnableIncomingWebhooks                   bool
@@ -133,6 +142,7 @@ type ServiceSettings struct {
 	EnableOnlyAdminIntegrations              *bool
 	EnablePostUsernameOverride               bool
 	EnablePostIconOverride                   bool
+	EnableAPIv3                              *bool
 	EnableLinkPreviews                       *bool
 	EnableTesting                            bool
 	EnableDeveloper                          *bool
@@ -149,6 +159,7 @@ type ServiceSettings struct {
 	WebsocketPort                            *int
 	WebserverMode                            *string
 	EnableCustomEmoji                        *bool
+	EnableEmojiPicker                        *bool
 	RestrictCustomEmojiCreation              *string
 	RestrictPostDelete                       *string
 	AllowEditPost                            *string
@@ -156,14 +167,20 @@ type ServiceSettings struct {
 	TimeBetweenUserTypingUpdatesMilliseconds *int64
 	EnablePostSearch                         *bool
 	EnableUserTypingMessages                 *bool
+	EnableChannelViewedMessages              *bool
 	EnableUserStatuses                       *bool
 	ClusterLogTimeoutMilliseconds            *int
 }
 
 type ClusterSettings struct {
-	Enable                 *bool
-	InterNodeListenAddress *string
-	InterNodeUrls          []string
+	Enable                *bool
+	ClusterName           *string
+	OverrideHostname      *string
+	UseIpAddress          *bool
+	UseExperimentalGossip *bool
+	ReadOnlyConfig        *bool
+	GossipPort            *int
+	StreamingPort         *int
 }
 
 type MetricsSettings struct {
@@ -195,6 +212,7 @@ type SqlSettings struct {
 	MaxOpenConns             int
 	Trace                    bool
 	AtRestEncryptKey         string
+	QueryTimeout             *int
 }
 
 type LogSettings struct {
@@ -223,12 +241,6 @@ type FileSettings struct {
 	Directory               string
 	EnablePublicLink        bool
 	PublicLinkSalt          *string
-	ThumbnailWidth          int
-	ThumbnailHeight         int
-	PreviewWidth            int
-	PreviewHeight           int
-	ProfileWidth            int
-	ProfileHeight           int
 	InitialFont             string
 	AmazonS3AccessKeyId     string
 	AmazonS3SecretAccessKey string
@@ -236,6 +248,7 @@ type FileSettings struct {
 	AmazonS3Region          string
 	AmazonS3Endpoint        string
 	AmazonS3SSL             *bool
+	AmazonS3SignV2          *bool
 }
 
 type EmailSettings struct {
@@ -288,6 +301,14 @@ type SupportSettings struct {
 	SupportEmail             *string
 }
 
+type AnnouncementSettings struct {
+	EnableBanner         *bool
+	BannerText           *string
+	BannerColor          *string
+	BannerTextColor      *string
+	AllowBannerDismissal *bool
+}
+
 type TeamSettings struct {
 	SiteName                            string
 	MaxUsersPerTeam                     int
@@ -310,6 +331,7 @@ type TeamSettings struct {
 	UserStatusAwayTimeout               *int64
 	MaxChannelsPerTeam                  *int64
 	MaxNotificationsPerChannel          *int64
+	TeammateNameDisplay                 *string
 }
 
 type LdapSettings struct {
@@ -401,29 +423,51 @@ type WebrtcSettings struct {
 	TurnSharedKey       *string
 }
 
+type ElasticsearchSettings struct {
+	ConnectionUrl   *string
+	Username        *string
+	Password        *string
+	EnableIndexing  *bool
+	EnableSearching *bool
+	Sniff           *bool
+}
+
+type DataRetentionSettings struct {
+	Enable *bool
+}
+
+type JobSettings struct {
+	RunJobs      *bool
+	RunScheduler *bool
+}
+
 type Config struct {
-	ServiceSettings      ServiceSettings
-	TeamSettings         TeamSettings
-	SqlSettings          SqlSettings
-	LogSettings          LogSettings
-	PasswordSettings     PasswordSettings
-	FileSettings         FileSettings
-	EmailSettings        EmailSettings
-	RateLimitSettings    RateLimitSettings
-	PrivacySettings      PrivacySettings
-	SupportSettings      SupportSettings
-	GitLabSettings       SSOSettings
-	GoogleSettings       SSOSettings
-	Office365Settings    SSOSettings
-	LdapSettings         LdapSettings
-	ComplianceSettings   ComplianceSettings
-	LocalizationSettings LocalizationSettings
-	SamlSettings         SamlSettings
-	NativeAppSettings    NativeAppSettings
-	ClusterSettings      ClusterSettings
-	MetricsSettings      MetricsSettings
-	AnalyticsSettings    AnalyticsSettings
-	WebrtcSettings       WebrtcSettings
+	ServiceSettings       ServiceSettings
+	TeamSettings          TeamSettings
+	SqlSettings           SqlSettings
+	LogSettings           LogSettings
+	PasswordSettings      PasswordSettings
+	FileSettings          FileSettings
+	EmailSettings         EmailSettings
+	RateLimitSettings     RateLimitSettings
+	PrivacySettings       PrivacySettings
+	SupportSettings       SupportSettings
+	AnnouncementSettings  AnnouncementSettings
+	GitLabSettings        SSOSettings
+	GoogleSettings        SSOSettings
+	Office365Settings     SSOSettings
+	LdapSettings          LdapSettings
+	ComplianceSettings    ComplianceSettings
+	LocalizationSettings  LocalizationSettings
+	SamlSettings          SamlSettings
+	NativeAppSettings     NativeAppSettings
+	ClusterSettings       ClusterSettings
+	MetricsSettings       MetricsSettings
+	AnalyticsSettings     AnalyticsSettings
+	WebrtcSettings        WebrtcSettings
+	ElasticsearchSettings ElasticsearchSettings
+	DataRetentionSettings DataRetentionSettings
+	JobSettings           JobSettings
 }
 
 func (o *Config) ToJson() string {
@@ -465,6 +509,11 @@ func (o *Config) SetDefaults() {
 		o.SqlSettings.AtRestEncryptKey = NewRandomString(32)
 	}
 
+	if o.SqlSettings.QueryTimeout == nil {
+		o.SqlSettings.QueryTimeout = new(int)
+		*o.SqlSettings.QueryTimeout = 30
+	}
+
 	if o.FileSettings.AmazonS3Endpoint == "" {
 		// Defaults to "s3.amazonaws.com"
 		o.FileSettings.AmazonS3Endpoint = "s3.amazonaws.com"
@@ -478,6 +527,11 @@ func (o *Config) SetDefaults() {
 	if o.FileSettings.AmazonS3SSL == nil {
 		o.FileSettings.AmazonS3SSL = new(bool)
 		*o.FileSettings.AmazonS3SSL = true // Secure by default.
+	}
+
+	if o.FileSettings.AmazonS3SignV2 == nil {
+		o.FileSettings.AmazonS3SignV2 = new(bool)
+		// Signature v2 is not enabled by default.
 	}
 
 	if o.FileSettings.EnableFileAttachments == nil {
@@ -515,6 +569,11 @@ func (o *Config) SetDefaults() {
 
 	if o.ServiceSettings.LicenseFileLocation == nil {
 		o.ServiceSettings.LicenseFileLocation = new(string)
+	}
+
+	if o.ServiceSettings.EnableAPIv3 == nil {
+		o.ServiceSettings.EnableAPIv3 = new(bool)
+		*o.ServiceSettings.EnableAPIv3 = true
 	}
 
 	if o.ServiceSettings.EnableLinkPreviews == nil {
@@ -796,6 +855,31 @@ func (o *Config) SetDefaults() {
 		*o.SupportSettings.SupportEmail = SUPPORT_SETTINGS_DEFAULT_SUPPORT_EMAIL
 	}
 
+	if o.AnnouncementSettings.EnableBanner == nil {
+		o.AnnouncementSettings.EnableBanner = new(bool)
+		*o.AnnouncementSettings.EnableBanner = false
+	}
+
+	if o.AnnouncementSettings.BannerText == nil {
+		o.AnnouncementSettings.BannerText = new(string)
+		*o.AnnouncementSettings.BannerText = ""
+	}
+
+	if o.AnnouncementSettings.BannerColor == nil {
+		o.AnnouncementSettings.BannerColor = new(string)
+		*o.AnnouncementSettings.BannerColor = ANNOUNCEMENT_SETTINGS_DEFAULT_BANNER_COLOR
+	}
+
+	if o.AnnouncementSettings.BannerTextColor == nil {
+		o.AnnouncementSettings.BannerTextColor = new(string)
+		*o.AnnouncementSettings.BannerTextColor = ANNOUNCEMENT_SETTINGS_DEFAULT_BANNER_TEXT_COLOR
+	}
+
+	if o.AnnouncementSettings.AllowBannerDismissal == nil {
+		o.AnnouncementSettings.AllowBannerDismissal = new(bool)
+		*o.AnnouncementSettings.AllowBannerDismissal = true
+	}
+
 	if o.LdapSettings.Enable == nil {
 		o.LdapSettings.Enable = new(bool)
 		*o.LdapSettings.Enable = false
@@ -950,7 +1034,12 @@ func (o *Config) SetDefaults() {
 
 	if o.ServiceSettings.EnableCustomEmoji == nil {
 		o.ServiceSettings.EnableCustomEmoji = new(bool)
-		*o.ServiceSettings.EnableCustomEmoji = true
+		*o.ServiceSettings.EnableCustomEmoji = false
+	}
+
+	if o.ServiceSettings.EnableEmojiPicker == nil {
+		o.ServiceSettings.EnableEmojiPicker = new(bool)
+		*o.ServiceSettings.EnableEmojiPicker = true
 	}
 
 	if o.ServiceSettings.RestrictCustomEmojiCreation == nil {
@@ -973,18 +1062,44 @@ func (o *Config) SetDefaults() {
 		*o.ServiceSettings.PostEditTimeLimit = 300
 	}
 
-	if o.ClusterSettings.InterNodeListenAddress == nil {
-		o.ClusterSettings.InterNodeListenAddress = new(string)
-		*o.ClusterSettings.InterNodeListenAddress = ":8075"
-	}
-
 	if o.ClusterSettings.Enable == nil {
 		o.ClusterSettings.Enable = new(bool)
 		*o.ClusterSettings.Enable = false
 	}
 
-	if o.ClusterSettings.InterNodeUrls == nil {
-		o.ClusterSettings.InterNodeUrls = []string{}
+	if o.ClusterSettings.ClusterName == nil {
+		o.ClusterSettings.ClusterName = new(string)
+		*o.ClusterSettings.ClusterName = ""
+	}
+
+	if o.ClusterSettings.OverrideHostname == nil {
+		o.ClusterSettings.OverrideHostname = new(string)
+		*o.ClusterSettings.OverrideHostname = ""
+	}
+
+	if o.ClusterSettings.UseIpAddress == nil {
+		o.ClusterSettings.UseIpAddress = new(bool)
+		*o.ClusterSettings.UseIpAddress = true
+	}
+
+	if o.ClusterSettings.UseExperimentalGossip == nil {
+		o.ClusterSettings.UseExperimentalGossip = new(bool)
+		*o.ClusterSettings.UseExperimentalGossip = false
+	}
+
+	if o.ClusterSettings.ReadOnlyConfig == nil {
+		o.ClusterSettings.ReadOnlyConfig = new(bool)
+		*o.ClusterSettings.ReadOnlyConfig = true
+	}
+
+	if o.ClusterSettings.GossipPort == nil {
+		o.ClusterSettings.GossipPort = new(int)
+		*o.ClusterSettings.GossipPort = 8074
+	}
+
+	if o.ClusterSettings.StreamingPort == nil {
+		o.ClusterSettings.StreamingPort = new(int)
+		*o.ClusterSettings.StreamingPort = 8075
 	}
 
 	if o.MetricsSettings.ListenAddress == nil {
@@ -1122,6 +1237,15 @@ func (o *Config) SetDefaults() {
 		*o.SamlSettings.LocaleAttribute = SAML_SETTINGS_DEFAULT_LOCALE_ATTRIBUTE
 	}
 
+	if o.TeamSettings.TeammateNameDisplay == nil {
+		o.TeamSettings.TeammateNameDisplay = new(string)
+		*o.TeamSettings.TeammateNameDisplay = SHOW_USERNAME
+
+		if *o.SamlSettings.Enable || *o.LdapSettings.Enable {
+			*o.TeamSettings.TeammateNameDisplay = SHOW_FULLNAME
+		}
+	}
+
 	if o.NativeAppSettings.AppDownloadLink == nil {
 		o.NativeAppSettings.AppDownloadLink = new(string)
 		*o.NativeAppSettings.AppDownloadLink = NATIVEAPP_SETTINGS_DEFAULT_APP_DOWNLOAD_LINK
@@ -1140,6 +1264,11 @@ func (o *Config) SetDefaults() {
 	if o.RateLimitSettings.Enable == nil {
 		o.RateLimitSettings.Enable = new(bool)
 		*o.RateLimitSettings.Enable = false
+	}
+
+	if o.ServiceSettings.GoroutineHealthThreshold == nil {
+		o.ServiceSettings.GoroutineHealthThreshold = new(int)
+		*o.ServiceSettings.GoroutineHealthThreshold = -1
 	}
 
 	if o.RateLimitSettings.MaxBurst == nil {
@@ -1207,6 +1336,11 @@ func (o *Config) SetDefaults() {
 		*o.ServiceSettings.EnableUserTypingMessages = true
 	}
 
+	if o.ServiceSettings.EnableChannelViewedMessages == nil {
+		o.ServiceSettings.EnableChannelViewedMessages = new(bool)
+		*o.ServiceSettings.EnableChannelViewedMessages = true
+	}
+
 	if o.ServiceSettings.EnableUserStatuses == nil {
 		o.ServiceSettings.EnableUserStatuses = new(bool)
 		*o.ServiceSettings.EnableUserStatuses = true
@@ -1215,6 +1349,51 @@ func (o *Config) SetDefaults() {
 	if o.ServiceSettings.ClusterLogTimeoutMilliseconds == nil {
 		o.ServiceSettings.ClusterLogTimeoutMilliseconds = new(int)
 		*o.ServiceSettings.ClusterLogTimeoutMilliseconds = 2000
+	}
+
+	if o.ElasticsearchSettings.ConnectionUrl == nil {
+		o.ElasticsearchSettings.ConnectionUrl = new(string)
+		*o.ElasticsearchSettings.ConnectionUrl = ""
+	}
+
+	if o.ElasticsearchSettings.Username == nil {
+		o.ElasticsearchSettings.Username = new(string)
+		*o.ElasticsearchSettings.Username = ""
+	}
+
+	if o.ElasticsearchSettings.Password == nil {
+		o.ElasticsearchSettings.Password = new(string)
+		*o.ElasticsearchSettings.Password = ""
+	}
+
+	if o.ElasticsearchSettings.EnableIndexing == nil {
+		o.ElasticsearchSettings.EnableIndexing = new(bool)
+		*o.ElasticsearchSettings.EnableIndexing = false
+	}
+
+	if o.ElasticsearchSettings.EnableSearching == nil {
+		o.ElasticsearchSettings.EnableSearching = new(bool)
+		*o.ElasticsearchSettings.EnableSearching = false
+	}
+
+	if o.ElasticsearchSettings.Sniff == nil {
+		o.ElasticsearchSettings.Sniff = new(bool)
+		*o.ElasticsearchSettings.Sniff = true
+	}
+
+	if o.DataRetentionSettings.Enable == nil {
+		o.DataRetentionSettings.Enable = new(bool)
+		*o.DataRetentionSettings.Enable = false
+	}
+
+	if o.JobSettings.RunJobs == nil {
+		o.JobSettings.RunJobs = new(bool)
+		*o.JobSettings.RunJobs = true
+	}
+
+	if o.JobSettings.RunScheduler == nil {
+		o.JobSettings.RunScheduler = new(bool)
+		*o.JobSettings.RunScheduler = true
 	}
 
 	o.defaultWebrtcSettings()
@@ -1260,6 +1439,10 @@ func (o *Config) IsValid() *AppError {
 		return NewLocAppError("Config.IsValid", "model.config.is_valid.restrict_direct_message.app_error", nil, "")
 	}
 
+	if !(*o.TeamSettings.TeammateNameDisplay == SHOW_FULLNAME || *o.TeamSettings.TeammateNameDisplay == SHOW_NICKNAME_FULLNAME || *o.TeamSettings.TeammateNameDisplay == SHOW_USERNAME) {
+		return NewLocAppError("Config.IsValid", "model.config.is_valid.teammate_name_display.app_error", nil, "")
+	}
+
 	if len(o.SqlSettings.AtRestEncryptKey) < 32 {
 		return NewLocAppError("Config.IsValid", "model.config.is_valid.encrypt_sql.app_error", nil, "")
 	}
@@ -1270,6 +1453,10 @@ func (o *Config) IsValid() *AppError {
 
 	if o.SqlSettings.MaxIdleConns <= 0 {
 		return NewLocAppError("Config.IsValid", "model.config.is_valid.sql_idle.app_error", nil, "")
+	}
+
+	if *o.SqlSettings.QueryTimeout <= 0 {
+		return NewAppError("Config.IsValid", "model.config.is_valid.sql_query_timeout.app_error", nil, "", http.StatusBadRequest)
 	}
 
 	if len(o.SqlSettings.DataSource) == 0 {
@@ -1286,30 +1473,6 @@ func (o *Config) IsValid() *AppError {
 
 	if !(o.FileSettings.DriverName == IMAGE_DRIVER_LOCAL || o.FileSettings.DriverName == IMAGE_DRIVER_S3) {
 		return NewLocAppError("Config.IsValid", "model.config.is_valid.file_driver.app_error", nil, "")
-	}
-
-	if o.FileSettings.PreviewHeight < 0 {
-		return NewLocAppError("Config.IsValid", "model.config.is_valid.file_preview_height.app_error", nil, "")
-	}
-
-	if o.FileSettings.PreviewWidth <= 0 {
-		return NewLocAppError("Config.IsValid", "model.config.is_valid.file_preview_width.app_error", nil, "")
-	}
-
-	if o.FileSettings.ProfileHeight <= 0 {
-		return NewLocAppError("Config.IsValid", "model.config.is_valid.file_profile_height.app_error", nil, "")
-	}
-
-	if o.FileSettings.ProfileWidth <= 0 {
-		return NewLocAppError("Config.IsValid", "model.config.is_valid.file_profile_width.app_error", nil, "")
-	}
-
-	if o.FileSettings.ThumbnailHeight <= 0 {
-		return NewLocAppError("Config.IsValid", "model.config.is_valid.file_thumb_height.app_error", nil, "")
-	}
-
-	if o.FileSettings.ThumbnailWidth <= 0 {
-		return NewLocAppError("Config.IsValid", "model.config.is_valid.file_thumb_width.app_error", nil, "")
 	}
 
 	if len(*o.FileSettings.PublicLinkSalt) < 32 {
@@ -1448,6 +1611,16 @@ func (o *Config) IsValid() *AppError {
 		return NewLocAppError("Config.IsValid", "model.config.is_valid.time_between_user_typing.app_error", nil, "")
 	}
 
+	if *o.ElasticsearchSettings.EnableIndexing {
+		if len(*o.ElasticsearchSettings.ConnectionUrl) == 0 {
+			return NewLocAppError("Config.IsValid", "model.config.is_valid.elastic_search.connection_url.app_error", nil, "")
+		}
+	}
+
+	if *o.ElasticsearchSettings.EnableSearching && !*o.ElasticsearchSettings.EnableIndexing {
+		return NewLocAppError("Config.IsValid", "model.config.is_valid.elastic_search.enable_searching.app_error", nil, "")
+	}
+
 	return nil
 }
 
@@ -1488,6 +1661,8 @@ func (o *Config) Sanitize() {
 	for i := range o.SqlSettings.DataSourceSearchReplicas {
 		o.SqlSettings.DataSourceSearchReplicas[i] = FAKE_SETTING
 	}
+
+	*o.ElasticsearchSettings.Password = FAKE_SETTING
 }
 
 func (o *Config) defaultWebrtcSettings() {

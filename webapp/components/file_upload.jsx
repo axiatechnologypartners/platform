@@ -17,7 +17,7 @@ import {uploadFile} from 'actions/file_actions.jsx';
 const holders = defineMessages({
     limited: {
         id: 'file_upload.limited',
-        defaultMessage: 'Uploads limited to {count} files maximum. Please use additional posts for more files.'
+        defaultMessage: 'Uploads limited to {count, number} files maximum. Please use additional posts for more files.'
     },
     filesAbove: {
         id: 'file_upload.filesAbove',
@@ -32,6 +32,8 @@ const holders = defineMessages({
         defaultMessage: 'Image Pasted at '
     }
 });
+
+import PropTypes from 'prop-types';
 
 import React from 'react';
 
@@ -49,7 +51,6 @@ class FileUpload extends React.Component {
         this.pasteUpload = this.pasteUpload.bind(this);
         this.keyUpload = this.keyUpload.bind(this);
         this.handleMaxUploadReached = this.handleMaxUploadReached.bind(this);
-        this.emojiClick = this.emojiClick.bind(this);
 
         this.state = {
             requests: {}
@@ -92,13 +93,13 @@ class FileUpload extends React.Component {
             const clientId = Utils.generateId();
 
             const request = uploadFile(
-                    files[i],
-                    files[i].name,
-                    channelId,
-                    clientId,
-                    this.fileUploadSuccess.bind(this, channelId),
-                    this.fileUploadFail.bind(this, clientId)
-                );
+                files[i],
+                files[i].name,
+                channelId,
+                clientId,
+                this.fileUploadSuccess.bind(this, channelId),
+                this.fileUploadFail.bind(this, clientId, channelId)
+            );
 
             const requests = this.state.requests;
             requests[clientId] = request;
@@ -226,10 +227,6 @@ class FileUpload extends React.Component {
 
         // jquery-dragster doesn't provide a function to unregister itself so do it manually
         target.off('dragenter dragleave dragover drop dragster:enter dragster:leave dragster:over dragster:drop');
-    }
-
-    emojiClick() {
-        this.props.onEmojiClick();
     }
 
     pasteUpload(e) {
@@ -375,18 +372,7 @@ class FileUpload extends React.Component {
         }
 
         const channelId = this.props.channelId || ChannelStore.getCurrentId();
-
         const uploadsRemaining = Constants.MAX_UPLOAD_FILES - this.props.getFileCount(channelId);
-
-        let emojiSpan;
-        if (this.props.emojiEnabled) {
-            emojiSpan = (
-                <span
-                    className={'fa fa-smile-o icon--emoji-picker emoji-' + this.props.navBarName}
-                    onClick={this.emojiClick}
-                />
-            );
-        }
 
         let fileDiv;
         if (global.window.mm_config.EnableFileAttachments === 'true') {
@@ -411,10 +397,9 @@ class FileUpload extends React.Component {
         return (
             <span
                 ref='input'
-                className={'btn btn-file' + (uploadsRemaining <= 0 ? ' btn-file__disabled' : '')}
+                className={uploadsRemaining <= 0 ? ' btn-file__disabled' : ''}
             >
                 {fileDiv}
-                {emojiSpan}
             </span>
         );
     }
@@ -422,19 +407,16 @@ class FileUpload extends React.Component {
 
 FileUpload.propTypes = {
     intl: intlShape.isRequired,
-    onUploadError: React.PropTypes.func,
-    getFileCount: React.PropTypes.func,
-    getTarget: React.PropTypes.func.isRequired,
-    onClick: React.PropTypes.func,
-    onFileUpload: React.PropTypes.func,
-    onUploadStart: React.PropTypes.func,
-    onFileUploadChange: React.PropTypes.func,
-    onTextDrop: React.PropTypes.func,
-    channelId: React.PropTypes.string,
-    postType: React.PropTypes.string,
-    onEmojiClick: React.PropTypes.func,
-    navBarName: React.PropTypes.string,
-    emojiEnabled: React.PropTypes.bool
+    onUploadError: PropTypes.func,
+    getFileCount: PropTypes.func,
+    getTarget: PropTypes.func.isRequired,
+    onClick: PropTypes.func,
+    onFileUpload: PropTypes.func,
+    onUploadStart: PropTypes.func,
+    onFileUploadChange: PropTypes.func,
+    onTextDrop: PropTypes.func,
+    channelId: PropTypes.string,
+    postType: PropTypes.string
 };
 
 export default injectIntl(FileUpload, {withRef: true});

@@ -2,8 +2,9 @@
 // See License.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import * as AsyncClient from 'utils/async_client.jsx';
+import * as EmojiActions from 'actions/emoji_actions.jsx';
 import EmojiStore from 'stores/emoji_store.jsx';
 
 import BackstageHeader from 'components/backstage/components/backstage_header.jsx';
@@ -14,12 +15,12 @@ import SpinnerButton from 'components/spinner_button.jsx';
 
 export default class AddEmoji extends React.Component {
     static propTypes = {
-        team: React.PropTypes.object,
-        user: React.PropTypes.object
+        team: PropTypes.object,
+        user: PropTypes.object
     };
 
     static contextTypes = {
-        router: React.PropTypes.object.isRequired
+        router: PropTypes.object.isRequired
     };
 
     constructor(props) {
@@ -113,7 +114,7 @@ export default class AddEmoji extends React.Component {
             return;
         }
 
-        AsyncClient.addEmoji(
+        EmojiActions.addEmoji(
             emoji,
             this.state.image,
             () => {

@@ -11,8 +11,10 @@ import UserStore from 'stores/user_store.jsx';
 import TeamStore from 'stores/team_store.jsx';
 
 import Constants from 'utils/constants.jsx';
-import {displayUsernameForUser} from 'utils/utils.jsx';
-import Client from 'client/web_client.jsx';
+import {displayEntireNameForUser} from 'utils/utils.jsx';
+import {Client4} from 'mattermost-redux/client';
+
+import PropTypes from 'prop-types';
 
 import React from 'react';
 import {Modal} from 'react-bootstrap';
@@ -27,9 +29,9 @@ const MAX_SELECTABLE_VALUES = 20;
 
 export default class AddUsersToTeam extends React.Component {
     static propTypes = {
-        onModalDismissed: React.PropTypes.func,
-        actions: React.PropTypes.shape({
-            getProfilesNotInTeam: React.PropTypes.func.isRequired
+        onModalDismissed: PropTypes.func,
+        actions: PropTypes.shape({
+            getProfilesNotInTeam: PropTypes.func.isRequired
         }).isRequired
     }
 
@@ -168,7 +170,7 @@ export default class AddUsersToTeam extends React.Component {
                 onClick={() => onAdd(option)}
             >
                 <ProfilePicture
-                    src={`${Client.getUsersRoute()}/${option.id}/image?time=${option.last_picture_update}`}
+                    src={Client4.getProfilePictureUrl(option.id, option.last_picture_update)}
                     width='32'
                     height='32'
                 />
@@ -176,7 +178,7 @@ export default class AddUsersToTeam extends React.Component {
                     className='more-modal__details'
                 >
                     <div className='more-modal__name'>
-                        {displayUsernameForUser(option)}
+                        {displayEntireNameForUser(option)}
                     </div>
                     <div className='more-modal__description'>
                         {option.email}
@@ -199,7 +201,7 @@ export default class AddUsersToTeam extends React.Component {
         const numRemainingText = (
             <FormattedMessage
                 id='multiselect.numPeopleRemaining'
-                defaultMessage='You can add {num, number} more {num, plural, =0 {people} one {person} other {people}}. '
+                defaultMessage='Use ↑↓ to browse, ↵ to select. You can add {num, number} more {num, plural, one {person} other {people}}. '
                 values={{
                     num: MAX_SELECTABLE_VALUES - this.state.values.length
                 }}
@@ -212,6 +214,11 @@ export default class AddUsersToTeam extends React.Component {
                 defaultMessage='Add'
             />
         );
+
+        let users = [];
+        if (this.state.users) {
+            users = this.state.users.filter((user) => user.delete_at === 0);
+        }
 
         return (
             <Modal
@@ -236,7 +243,7 @@ export default class AddUsersToTeam extends React.Component {
                 <Modal.Body>
                     <MultiSelect
                         key='addUsersToTeamKey'
-                        options={this.state.users}
+                        options={users}
                         optionRenderer={this.renderOption}
                         values={this.state.values}
                         valueRenderer={this.renderValue}

@@ -2,6 +2,7 @@
 // See License.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import FormError from 'components/form_error.jsx';
 
@@ -17,9 +18,9 @@ const FAKE_SECRET = '***************';
 export default class InstalledOAuthApp extends React.Component {
     static get propTypes() {
         return {
-            oauthApp: React.PropTypes.object.isRequired,
-            onDelete: React.PropTypes.func.isRequired,
-            filter: React.PropTypes.string
+            oauthApp: PropTypes.object.isRequired,
+            onDelete: PropTypes.func.isRequired,
+            filter: PropTypes.string
         };
     }
 
@@ -53,8 +54,7 @@ export default class InstalledOAuthApp extends React.Component {
 
         regenerateOAuthAppSecret(
             this.props.oauthApp.id,
-            (data) => {
-                this.props.oauthApp.client_secret = data.client_secret;
+            () => {
                 this.handleShowClientSecret(e);
             },
             (err) => {

@@ -2,6 +2,7 @@
 // See License.txt for license information.
 
 import $ from 'jquery';
+import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {FormattedMessage} from 'react-intl';
@@ -14,23 +15,23 @@ const NEXT_BUTTON_TIMEOUT = 500;
 
 export default class SearchableUserList extends React.Component {
     static propTypes = {
-        users: React.PropTypes.arrayOf(React.PropTypes.object),
-        usersPerPage: React.PropTypes.number,
-        total: React.PropTypes.number,
-        extraInfo: React.PropTypes.object,
-        nextPage: React.PropTypes.func.isRequired,
-        previousPage: React.PropTypes.func.isRequired,
-        search: React.PropTypes.func.isRequired,
-        actions: React.PropTypes.arrayOf(React.PropTypes.func),
-        actionProps: React.PropTypes.object,
-        actionUserProps: React.PropTypes.object,
-        focusOnMount: React.PropTypes.bool,
-        renderCount: React.PropTypes.func,
-        renderFilterRow: React.PropTypes.func,
+        users: PropTypes.arrayOf(PropTypes.object),
+        usersPerPage: PropTypes.number,
+        total: PropTypes.number,
+        extraInfo: PropTypes.object,
+        nextPage: PropTypes.func.isRequired,
+        previousPage: PropTypes.func.isRequired,
+        search: PropTypes.func.isRequired,
+        actions: PropTypes.arrayOf(PropTypes.func),
+        actionProps: PropTypes.object,
+        actionUserProps: PropTypes.object,
+        focusOnMount: PropTypes.bool,
+        renderCount: PropTypes.func,
+        renderFilterRow: PropTypes.func,
 
-        page: React.PropTypes.number.isRequired,
-        term: React.PropTypes.string.isRequired,
-        onTermChange: React.PropTypes.func.isRequired
+        page: PropTypes.number.isRequired,
+        term: PropTypes.string.isRequired,
+        onTermChange: PropTypes.func.isRequired
     };
 
     static defaultProps = {
@@ -134,7 +135,7 @@ export default class SearchableUserList extends React.Component {
                 return (
                     <FormattedMessage
                         id='filtered_user_list.countTotal'
-                        defaultMessage='{count} {count, plural, =0 {0 members} one {member} other {members}} of {total} total'
+                        defaultMessage='{count, number} {count, plural, one {member} other {members}} of {total, number} total'
                         values={{
                             count,
                             total
@@ -146,7 +147,7 @@ export default class SearchableUserList extends React.Component {
             return (
                 <FormattedMessage
                     id='filtered_user_list.countTotalPage'
-                    defaultMessage='{startCount, number} - {endCount, number} {count, plural, =0 {0 members} one {member} other {members}} of {total} total'
+                    defaultMessage='{startCount, number} - {endCount, number} {count, plural, one {member} other {members}} of {total, number} total'
                     values={{
                         count,
                         startCount: startCount + 1,

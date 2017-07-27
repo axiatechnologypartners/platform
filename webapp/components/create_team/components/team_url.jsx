@@ -8,6 +8,8 @@ import * as URL from 'utils/url.jsx';
 
 import logoImage from 'images/logo.png';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Button, Tooltip, OverlayTrigger} from 'react-bootstrap';
@@ -176,6 +178,7 @@ export default class TeamUrl extends React.Component {
                             <div className='col-sm-11'>
                                 <div className='input-group input-group--limit'>
                                     <OverlayTrigger
+                                        trigger={['hover', 'focus']}
                                         delayShow={Constants.OVERLAY_TIME_DELAY}
                                         placement='top'
                                         overlay={urlTooltip}
@@ -242,6 +245,6 @@ export default class TeamUrl extends React.Component {
 }
 
 TeamUrl.propTypes = {
-    state: React.PropTypes.object,
-    updateParent: React.PropTypes.func
+    state: PropTypes.object,
+    updateParent: PropTypes.func
 };

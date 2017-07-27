@@ -89,7 +89,7 @@
   },
   {
     "id": "api.admin.saml.metadata.app_error",
-    "translation": "在建立服務提供者的中繼資料時發生錯誤"
+    "translation": "在建立服務提供者的中繼資料時發生錯誤。"
   },
   {
     "id": "api.admin.test_email.body",
@@ -429,7 +429,7 @@
   },
   {
     "id": "api.command.execute_command.not_found.app_error",
-    "translation": "找不到附帶觸發器 '{{.Trigger}}' 的命令"
+    "translation": "找不到觸發為'{{.Trigger}}'的指令。請在訊息開頭增加空白來發送以\"/\"起始的訊息。"
   },
   {
     "id": "api.command.execute_command.save.app_error",
@@ -458,6 +458,10 @@
   {
     "id": "api.command.invite_people.hint",
     "translation": "[name@domain.com ...]"
+  },
+  {
+    "id": "api.command.invite_people.invite_off",
+    "translation": "本伺服器禁止建立使用者，不寄送邀請。"
   },
   {
     "id": "api.command.invite_people.name",
@@ -494,6 +498,38 @@
   {
     "id": "api.command_away.success",
     "translation": "現在狀態為「離開」"
+  },
+  {
+    "id": "api.command_channel_header.channel.app_error",
+    "translation": "取得當前頻道時錯誤。"
+  },
+  {
+    "id": "api.command_channel_header.desc",
+    "translation": "編輯頻道標題"
+  },
+  {
+    "id": "api.command_channel_header.hint",
+    "translation": "[文字]"
+  },
+  {
+    "id": "api.command_channel_header.message.app_error",
+    "translation": "/header 指令必須帶有文字"
+  },
+  {
+    "id": "api.command_channel_header.name",
+    "translation": "header"
+  },
+  {
+    "id": "api.command_channel_header.permission.app_error",
+    "translation": "權限不足以編輯頻道標題。"
+  },
+  {
+    "id": "api.command_channel_header.update_channel.app_error",
+    "translation": "更新當前頻道時錯誤。"
+  },
+  {
+    "id": "api.command_channel_header.update_channel.success",
+    "translation": "成功更新頻道標題。"
   },
   {
     "id": "api.command_collapse.desc",
@@ -550,6 +586,14 @@
   {
     "id": "api.command_expand_collapse.fail.app_error",
     "translation": "展開預覽時發生錯誤"
+  },
+  {
+    "id": "api.command_help.desc",
+    "translation": "開啟 Mattermost 說明頁面"
+  },
+  {
+    "id": "api.command_help.name",
+    "translation": "help"
   },
   {
     "id": "api.command_join.desc",
@@ -660,6 +704,38 @@
     "translation": "現在狀態為「上線」"
   },
   {
+    "id": "api.command_open.name",
+    "translation": "open"
+  },
+  {
+    "id": "api.command_search.desc",
+    "translation": "從訊息中搜尋文字"
+  },
+  {
+    "id": "api.command_search.hint",
+    "translation": "[文字]"
+  },
+  {
+    "id": "api.command_search.name",
+    "translation": "search"
+  },
+  {
+    "id": "api.command_search.unsupported.app_error",
+    "translation": "當前裝置不支援搜尋命令"
+  },
+  {
+    "id": "api.command_settings.desc",
+    "translation": "開啟帳號設定對話框"
+  },
+  {
+    "id": "api.command_settings.name",
+    "translation": "settings"
+  },
+  {
+    "id": "api.command_settings.unsupported.app_error",
+    "translation": "當前裝置不支援設定命令"
+  },
+  {
     "id": "api.command_shortcuts.browser.channel_next",
     "translation": "{{.ChannelNextCmd}}：紀錄的下一個頻道\n"
   },
@@ -737,7 +813,7 @@
   },
   {
     "id": "api.command_shortcuts.msgs.comp_emoji",
-    "translation": ":[文字]+TAB：自動完成以[文字]起始的顏文字\n\n"
+    "translation": ":[文字]+TAB：自動完成以[文字]起始的繪文字\n\n"
   },
   {
     "id": "api.command_shortcuts.msgs.comp_username",
@@ -756,6 +832,10 @@
     "translation": "ESC：將當前頻道所有訊息設為已讀\n"
   },
   {
+    "id": "api.command_shortcuts.msgs.reply",
+    "translation": "SHIFT+UP (在空的輸入欄)：回覆當前頻道最新的訊息\n"
+  },
+  {
     "id": "api.command_shortcuts.msgs.reprint_next",
     "translation": "{{.CmdOrCtrl}}+DOWN (在空的輸入欄)：顯示下一個您輸入的訊息或是斜線命令\n"
   },
@@ -766,6 +846,10 @@
   {
     "id": "api.command_shortcuts.name",
     "translation": "快捷鍵"
+  },
+  {
+    "id": "api.command_shortcuts.nav.direct_messages_menu",
+    "translation": "{{.CmdOrCtrl}}+SHIFT+K: 開啟直接傳訊選單\n"
   },
   {
     "id": "api.command_shortcuts.nav.header",
@@ -790,6 +874,10 @@
   {
     "id": "api.command_shortcuts.nav.switcher",
     "translation": "{{.CmdOrCtrl}}+K：開啟快速切換頻道對話框\n"
+  },
+  {
+    "id": "api.command_shortcuts.nav.switcher_team",
+    "translation": "{{.CmdOrCtrl}}+ALT+K：開啟快速切換團隊對話框\n"
   },
   {
     "id": "api.command_shortcuts.nav.unread_next",
@@ -886,6 +974,10 @@
   {
     "id": "api.context.unknown.app_error",
     "translation": "發生未知的錯誤。請聯繫支援單位。"
+  },
+  {
+    "id": "api.context.v3_disabled.app_error",
+    "translation": "此伺服器已停用 API 版本 3，請用 API 版本 4。如需詳細資訊，請參閱 https://api.mattermost.com"
   },
   {
     "id": "api.deprecated.init.debug",
@@ -1418,6 +1510,10 @@
     "translation": "正在初始化 OAuth API 路徑"
   },
   {
+    "id": "api.oauth.invalid_state_token.app_error",
+    "translation": "無效的狀態 Token"
+  },
+  {
     "id": "api.oauth.regenerate_secret.app_error",
     "translation": "權限不足以重新產生 OAuth2 應用程式密碼"
   },
@@ -1448,6 +1544,10 @@
   {
     "id": "api.oauth.singup_with_oauth.invalid_link.app_error",
     "translation": "此註冊連結不是有效連結"
+  },
+  {
+    "id": "api.opengraph.init.debug",
+    "translation": "初始化 Open Graph 協定 API 路徑"
   },
   {
     "id": "api.post.check_for_out_of_channel_mentions.message.multiple",
@@ -1612,6 +1712,14 @@
     "translation": "新的直接訊息"
   },
   {
+    "id": "api.post.send_notifications_and_forget.push_image_only",
+    "translation": "已上傳一個或更多檔案"
+  },
+  {
+    "id": "api.post.send_notifications_and_forget.push_image_only_dm",
+    "translation": "在直接傳訊中已上傳一個或更多檔案"
+  },
+  {
     "id": "api.post.send_notifications_and_forget.push_in",
     "translation": " 於 "
   },
@@ -1626,10 +1734,6 @@
   {
     "id": "api.post.send_notifications_and_forget.push_non_mention",
     "translation": " 張貼於 "
-  },
-  {
-    "id": "api.post.send_notifications_and_forget.push_notification.debug",
-    "translation": "正在傳送推播通知至 %v，訊息為 '%v'"
   },
   {
     "id": "api.post.send_notifications_and_forget.push_notification.error",
@@ -1968,12 +2072,8 @@
     "translation": "找不到使用者"
   },
   {
-    "id": "api.team.add_user_to_team.invalid_data.app_error",
-    "translation": "無效的資料。"
-  },
-  {
-    "id": "api.team.add_user_to_team.invalid_invite_id.app_error",
-    "translation": "無效的邀請ID。沒有團隊符合此ID。"
+    "id": "api.system.go_routines",
+    "translation": "執行中的 Goroutine 數量超過健康界線 %v (%v)"
   },
   {
     "id": "api.team.add_user_to_team.missing_parameter.app_error",
@@ -2046,6 +2146,10 @@
   {
     "id": "api.team.invite_members.already.app_error",
     "translation": "此人已在您的團隊中"
+  },
+  {
+    "id": "api.team.invite_members.invalid_email.app_error",
+    "translation": "這些電子郵件地址的網域不被接受：{{.Addresses}}。詳情請聯絡系統管理員。"
   },
   {
     "id": "api.team.invite_members.member",
@@ -2273,7 +2377,7 @@
   },
   {
     "id": "api.templates.signin_change_email.subject",
-    "translation": "[{{ .SiteName }}] 在{{ .SiteName}}的登入方式已更新"
+    "translation": "[{{ .SiteName }}]  登入方式已更新"
   },
   {
     "id": "api.templates.signup_team_body.button",
@@ -2462,6 +2566,14 @@
   {
     "id": "api.user.create_user.joining.error",
     "translation": "加入預設頻道時遇到錯誤 user_id=%s, team_id=%s, err=%v"
+  },
+  {
+    "id": "api.user.create_user.missing_hash_or_data.app_error",
+    "translation": "缺少雜湊或 URL 查詢資料。"
+  },
+  {
+    "id": "api.user.create_user.missing_invite_id.app_error",
+    "translation": "缺少邀請 ID。"
   },
   {
     "id": "api.user.create_user.no_open_server",
@@ -2725,7 +2837,7 @@
   },
   {
     "id": "api.user.upload_profile_user.decode_config.app_error",
-    "translation": "無法解碼個人頭像設定"
+    "translation": "無法儲存個人資訊圖片。檔案不是有效圖片。"
   },
   {
     "id": "api.user.upload_profile_user.encode.app_error",
@@ -2932,8 +3044,48 @@
     "translation": "匯入頻道失敗。不存在名字為 \"{{.TeamName}}\" 的團隊。"
   },
   {
+    "id": "app.import.import_direct_channel.create_direct_channel.error",
+    "translation": "建立直接傳訊頻道時失敗"
+  },
+  {
+    "id": "app.import.import_direct_channel.create_group_channel.error",
+    "translation": "建立群組頻道時失敗"
+  },
+  {
+    "id": "app.import.import_direct_channel.member_not_found.error",
+    "translation": "匯入直接傳訊頻道時找不到頻道成員"
+  },
+  {
+    "id": "app.import.import_direct_channel.update_header_failed.error",
+    "translation": "更新直接傳訊頻道標題時失敗"
+  },
+  {
+    "id": "app.import.import_direct_post.channel_member_not_found.error",
+    "translation": "匯入直接傳訊頻道訊息時找不到頻道成員"
+  },
+  {
+    "id": "app.import.import_direct_post.create_direct_channel.error",
+    "translation": "取得直接傳訊頻道時失敗"
+  },
+  {
+    "id": "app.import.import_direct_post.create_group_channel.error",
+    "translation": "取得群組頻道時失敗"
+  },
+  {
+    "id": "app.import.import_direct_post.user_not_found.error",
+    "translation": "發訊者不存在"
+  },
+  {
     "id": "app.import.import_line.null_channel.error",
     "translation": "匯入資料行資料型別為\"頻道\"但頻道物件為 null"
+  },
+  {
+    "id": "app.import.import_line.null_direct_channel.error",
+    "translation": "匯入資料行資料型別為\"直接傳訊頻道\"但直接傳訊頻道物件為 null"
+  },
+  {
+    "id": "app.import.import_line.null_direct_post.error",
+    "translation": "匯入資料行資料型別為\"直接訊息\"但直接訊息物件為 null"
   },
   {
     "id": "app.import.import_line.null_post.error",
@@ -3008,6 +3160,54 @@
     "translation": "缺少必要的頻道屬性：類型。"
   },
   {
+    "id": "app.import.validate_direct_channel_import_data.header_length.error",
+    "translation": "直接傳訊頻道標題過長"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_required.error",
+    "translation": "缺少必要的直接傳訊頻道屬性：成員。"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_too_few.error",
+    "translation": "直接傳訊頻道成員列表的欄位過少"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_too_many.error",
+    "translation": "直接傳訊頻道成員列表的欄位過多"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_required.error",
+    "translation": "缺少必要的直接訊息屬性：頻道成員。"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_too_few.error",
+    "translation": "直接訊息頻道成員列表的欄位過少"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_too_many.error",
+    "translation": "直接訊息頻道成員列表的欄位過多"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.create_at_missing.error",
+    "translation": "缺少必要的直接訊息屬性：建立日期。"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.create_at_zero.error",
+    "translation": "建立日期必須大於零"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.message_length.error",
+    "translation": "訊息過長"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.message_missing.error",
+    "translation": "缺少必要的直接訊息屬性：訊息。"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.user_missing.error",
+    "translation": "缺少必要的直接訊息屬性：使用者。"
+  },
+  {
     "id": "app.import.validate_post_import_data.channel_missing.error",
     "translation": "缺少必要的訊息屬性：頻道。"
   },
@@ -3017,7 +3217,7 @@
   },
   {
     "id": "app.import.validate_post_import_data.create_at_zero.error",
-    "translation": "如果有提供，訊息建立日期不能為零。"
+    "translation": "如果有提供訊息建立時間，該值不能為 0。"
   },
   {
     "id": "app.import.validate_post_import_data.message_length.error",
@@ -3233,7 +3433,7 @@
   },
   {
     "id": "ent.cluster.config_changed.info",
-    "translation": "叢集設定已變更(id=%v)。 正在嘗試重新啟動叢集服務。 由於偵測到了核心設定的變更，為了保證叢集被正確的組態，您不應該依賴這次重新啟動。"
+    "translation": "叢集設定已改變 id={{ .id }}。此叢集可能不穩定，需要重新啟動。為了確保叢集被正確的設定，您應該馬上進行漸進式重啟。"
   },
   {
     "id": "ent.cluster.debug_fail.debug",
@@ -3265,7 +3465,7 @@
   },
   {
     "id": "ent.cluster.save_config.error",
-    "translation": "啟用高可用性時系統控制台被設定為唯讀。"
+    "translation": "啟用高可用性時系統控制台將被設定成唯讀模式，在設定檔當中停用 ReadOnlyConfig 以停止此行為。"
   },
   {
     "id": "ent.cluster.starting.info",
@@ -3294,6 +3494,46 @@
   {
     "id": "ent.compliance.run_started.info",
     "translation": "規範匯出作業 '{{.JobName}}' 開始，匯出到 '{{.FilePath}}'"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.disabled",
+    "translation": "ElasticSearch 搜尋在此伺服器上為停用"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.search_failed",
+    "translation": "無法完成搜尋"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.unmarshall_post_failed",
+    "translation": "無法解碼搜尋結果"
+  },
+  {
+    "id": "ent.elasticsearch.start.connect_failed",
+    "translation": "設定 ElasticSearch 用戶端時失敗"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_create_failed",
+    "translation": "建立 ElasticSearch 索引時失敗"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_exists_failed",
+    "translation": "確認 ElasticSearch 索引是否存在時失敗"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_mapping_failed",
+    "translation": "設定 ElasticSearch 索引映射時失敗"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_settings_failed",
+    "translation": "設定 ElasticSearch 索引設定時失敗"
+  },
+  {
+    "id": "ent.elasticsearch.test_config.indexing_disabled.error",
+    "translation": "Elasticsearch 已停用。"
+  },
+  {
+    "id": "ent.elasticsearch.test_config.license.error",
+    "translation": "授權不支援 Elasticsearch。"
   },
   {
     "id": "ent.emoji.licence_disable.app_error",
@@ -3852,6 +4092,22 @@
     "translation": "啟用叢集時無法啟用批次郵件"
   },
   {
+    "id": "model.config.is_valid.elastic_search.connection_url.app_error",
+    "translation": "當啟用 ElasticSearch 搜尋時必須設定 ElasticSearch ConnectionUrl。"
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.enable_searching.app_error",
+    "translation": "當啟用 ElasticSearch 搜尋時必須設定 ElasticSearch IndexingEnabled 為啟用。"
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.password.app_error",
+    "translation": "當啟用 ElasticSearch 搜尋時必須設定 ElasticSearch 密碼。"
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.username.app_error",
+    "translation": "當啟用 ElasticSearch 搜尋時必須設定 ElasticSearch 使用者名稱。"
+  },
+  {
     "id": "model.config.is_valid.email_batching_buffer_size.app_error",
     "translation": "電子郵件設定的批次郵件緩衝大小值無效。必須大於等於零。"
   },
@@ -4074,6 +4330,14 @@
   {
     "id": "model.config.is_valid.sql_max_conn.app_error",
     "translation": "SQL 設定中的最高開啟連線數無效。必須為正數。"
+  },
+  {
+    "id": "model.config.is_valid.sql_query_timeout.app_error",
+    "translation": "SQL 設定中的查詢時限無效。必須為正數。"
+  },
+  {
+    "id": "model.config.is_valid.teammate_name_display.app_error",
+    "translation": "團隊成員顯示設定值無效。必須為'full_name'、'nickname_full_name'或'username'"
   },
   {
     "id": "model.config.is_valid.time_between_user_typing.app_error",
@@ -4632,14 +4896,6 @@
     "translation": "開啟 SQL 連線失敗 %v"
   },
   {
-    "id": "store.sql.ping.critical",
-    "translation": "偵測資料庫失敗 err:%v"
-  },
-  {
-    "id": "store.sql.pinging.info",
-    "translation": "正在偵測 sql %v 資料庫"
-  },
-  {
     "id": "store.sql.read_replicas_not_licensed.critical",
     "translation": "目前授權不支援超過一個以上的讀取用複製機，請聯繫系統管理員升級到企業授權。"
   },
@@ -5036,6 +5292,30 @@
     "translation": "無法儲存檔案訊息"
   },
   {
+    "id": "store.sql_file_info.save_or_update.app_error",
+    "translation": "無法儲存或更新檔案訊息"
+  },
+  {
+    "id": "store.sql_job_status.delete_by_type.app_error",
+    "translation": "無法刪除工作狀態"
+  },
+  {
+    "id": "store.sql_job_status.get.app_error",
+    "translation": "無法取得工作狀態"
+  },
+  {
+    "id": "store.sql_job_status.get_all.app_error",
+    "translation": "無法取得全部的工作狀態"
+  },
+  {
+    "id": "store.sql_job_status.save.app_error",
+    "translation": "無法儲存工作狀態"
+  },
+  {
+    "id": "store.sql_job_status.update.app_error",
+    "translation": "無法更新工作狀態"
+  },
+  {
     "id": "store.sql_license.get.app_error",
     "translation": "取得授權時遇到錯誤"
   },
@@ -5182,6 +5462,10 @@
   {
     "id": "store.sql_post.get_posts_around.get_parent.app_error",
     "translation": "無法取得該頻道的上層訊息"
+  },
+  {
+    "id": "store.sql_post.get_posts_by_ids.app_error",
+    "translation": "無法取得訊息"
   },
   {
     "id": "store.sql_post.get_posts_created_att.app_error",
@@ -5608,6 +5892,10 @@
     "translation": "找到數個相符於您的認證之帳號，所以無法讓您登入，請聯繫系統管理員。"
   },
   {
+    "id": "store.sql_user.get_new_users.app_error",
+    "translation": "尋找新使用者時遇到錯誤"
+  },
+  {
     "id": "store.sql_user.get_profiles.app_error",
     "translation": "尋找使用者資訊時遇到錯誤"
   },
@@ -5896,6 +6184,10 @@
     "translation": "簽章授權時遇到錯誤, err=%v"
   },
   {
+    "id": "utils.mail.connect_smtp.helo.app_error",
+    "translation": "設定 HELO 時失敗"
+  },
+  {
     "id": "utils.mail.connect_smtp.open.app_error",
     "translation": "開啟連線失敗"
   },
@@ -5908,6 +6200,10 @@
     "translation": "SMTP 伺服器驗證失敗"
   },
   {
+    "id": "utils.mail.new_client.helo.error",
+    "translation": "對 SMTP 伺服器 %v 設定 HELO時失敗"
+  },
+  {
     "id": "utils.mail.new_client.open.error",
     "translation": "開啟對 SMTP 伺服器 %v 的連線時失敗"
   },
@@ -5917,7 +6213,7 @@
   },
   {
     "id": "utils.mail.send_mail.from_address.app_error",
-    "translation": "新增送信人失敗"
+    "translation": "缺少通知信寄件人地址設定或是該設定無效。"
   },
   {
     "id": "utils.mail.send_mail.msg.app_error",
@@ -5933,7 +6229,7 @@
   },
   {
     "id": "utils.mail.send_mail.to_address.app_error",
-    "translation": "新增收件人失敗"
+    "translation": "缺少通知信收件人地址設定或是該設定無效。"
   },
   {
     "id": "utils.mail.test.configured.error",

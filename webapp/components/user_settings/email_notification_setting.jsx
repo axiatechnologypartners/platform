@@ -2,8 +2,9 @@
 // See License.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import {savePreference} from 'utils/async_client.jsx';
+import {savePreference} from 'actions/user_actions.jsx';
 import PreferenceStore from 'stores/preference_store.jsx';
 import {localizeMessage} from 'utils/utils.jsx';
 
@@ -15,12 +16,12 @@ import {Preferences} from 'utils/constants.jsx';
 
 export default class EmailNotificationSetting extends React.Component {
     static propTypes = {
-        activeSection: React.PropTypes.string.isRequired,
-        updateSection: React.PropTypes.func.isRequired,
-        enableEmail: React.PropTypes.bool.isRequired,
-        onChange: React.PropTypes.func.isRequired,
-        onSubmit: React.PropTypes.func.isRequired,
-        serverError: React.PropTypes.string
+        activeSection: PropTypes.string.isRequired,
+        updateSection: PropTypes.func.isRequired,
+        enableEmail: PropTypes.bool.isRequired,
+        onChange: PropTypes.func.isRequired,
+        onSubmit: PropTypes.func.isRequired,
+        serverError: PropTypes.string
     };
 
     constructor(props) {

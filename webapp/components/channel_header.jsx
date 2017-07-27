@@ -37,6 +37,8 @@ import AppDispatcher from 'dispatcher/app_dispatcher.jsx';
 
 import {Constants, Preferences, UserStatuses, ActionTypes} from 'utils/constants.jsx';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
 import {Tooltip, OverlayTrigger, Popover} from 'react-bootstrap';
@@ -62,6 +64,7 @@ export default class ChannelHeader extends React.Component {
         this.hideLeaveChannelModal = this.hideLeaveChannelModal.bind(this);
 
         const state = this.getStateFromStores();
+        state.showEditChannelHeaderModal = false;
         state.showEditChannelPurposeModal = false;
         state.showMembersModal = false;
         state.showRenameChannelModal = false;
@@ -71,7 +74,7 @@ export default class ChannelHeader extends React.Component {
     getStateFromStores() {
         const channel = ChannelStore.get(this.props.channelId);
         const stats = ChannelStore.getStats(this.props.channelId);
-        const users = UserStore.getProfileListInChannel(this.props.channelId);
+        const users = UserStore.getProfileListInChannel(this.props.channelId, false, true);
 
         let otherUserId = null;
         if (channel && channel.type === 'D') {
@@ -88,7 +91,8 @@ export default class ChannelHeader extends React.Component {
             enableFormatting: PreferenceStore.getBool(Preferences.CATEGORY_ADVANCED_SETTINGS, 'formatting', true),
             isBusy: WebrtcStore.isBusy(),
             isFavorite: channel && ChannelUtils.isFavoriteChannel(channel),
-            showLeaveChannelModal: false
+            showLeaveChannelModal: false,
+            pinsOpen: SearchStore.getIsPinnedPosts()
         };
     }
 
@@ -225,7 +229,7 @@ export default class ChannelHeader extends React.Component {
         AppDispatcher.handleViewAction({
             type: ActionTypes.TOGGLE_DM_MODAL,
             value: true,
-            startingUsers: UserStore.getProfileListInChannel(this.props.channelId, true)
+            startingUsers: UserStore.getProfileListInChannel(this.props.channelId, true, false)
         });
     }
 
@@ -270,7 +274,7 @@ export default class ChannelHeader extends React.Component {
                 title={title}
                 message={message}
                 confirmButtonClass={buttonClass}
-                confirmButton={button}
+                confirmButtonText={button}
                 onConfirm={() => ChannelActions.leaveChannel(this.state.channel.id)}
                 onCancel={this.hideLeaveChannelModal}
             />
@@ -279,7 +283,8 @@ export default class ChannelHeader extends React.Component {
 
     render() {
         const flagIcon = Constants.FLAG_ICON_SVG;
-        const pinIcon = Constants.PIN_ICON;
+        const pinIcon = Constants.PIN_ICON_SVG;
+        const mentionsIcon = Constants.MENTIONS_ICON_SVG;
 
         if (!this.validState()) {
             // Use an empty div to make sure the header's height stays constant
@@ -294,6 +299,15 @@ export default class ChannelHeader extends React.Component {
                 <FormattedMessage
                     id='channel_header.recentMentions'
                     defaultMessage='Recent Mentions'
+                />
+            </Tooltip>
+        );
+
+        const pinnedPostTooltip = (
+            <Tooltip id='pinnedPostTooltip'>
+                <FormattedMessage
+                    id='channel_header.pinnedPosts'
+                    defaultMessage='Pinned Posts'
                 />
             </Tooltip>
         );
@@ -380,13 +394,14 @@ export default class ChannelHeader extends React.Component {
                 );
 
                 webrtc = (
-                    <div className='webrtc__header'>
+                    <div className='webrtc__header channel-header__icon'>
                         <a
                             href='#'
                             onClick={() => this.initWebrtc(otherUserId, !isOffline)}
                             disabled={isOffline}
                         >
                             <OverlayTrigger
+                                trigger={['hover', 'focus']}
                                 delayShow={Constants.WEBRTC_TIME_DELAY}
                                 placement='bottom'
                                 overlay={webrtcTooltip}
@@ -423,11 +438,11 @@ export default class ChannelHeader extends React.Component {
         if (isDirect) {
             dropdownContents.push(
                 <li
-                    id='channelEditHeaderDirect'
                     key='edit_header_direct'
                     role='presentation'
                 >
                     <ToggleModalButton
+                        id='channelEditHeaderDirect'
                         role='menuitem'
                         dialogType={EditChannelHeaderModal}
                         dialogProps={{channel}}
@@ -442,11 +457,11 @@ export default class ChannelHeader extends React.Component {
         } else if (isGroup) {
             dropdownContents.push(
                 <li
-                    id='channelEditHeaderGroup'
                     key='edit_header_direct'
                     role='presentation'
                 >
                     <ToggleModalButton
+                        id='channelEditHeaderGroup'
                         role='menuitem'
                         dialogType={EditChannelHeaderModal}
                         dialogProps={{channel}}
@@ -461,11 +476,11 @@ export default class ChannelHeader extends React.Component {
 
             dropdownContents.push(
                 <li
-                    id='channelnotificationPreferencesGroup'
                     key='notification_preferences'
                     role='presentation'
                 >
                     <ToggleModalButton
+                        id='channelnotificationPreferencesGroup'
                         role='menuitem'
                         dialogType={ChannelNotificationsModal}
                         dialogProps={{
@@ -484,11 +499,11 @@ export default class ChannelHeader extends React.Component {
 
             dropdownContents.push(
                 <li
-                    id='channelAddMembersGroup'
                     key='add_members'
                     role='presentation'
                 >
                     <a
+                        id='channelAddMembersGroup'
                         role='menuitem'
                         href='#'
                         onClick={this.openDirectMessageModal}
@@ -503,11 +518,11 @@ export default class ChannelHeader extends React.Component {
         } else {
             dropdownContents.push(
                 <li
-                    id='channelViewInfo'
                     key='view_info'
                     role='presentation'
                 >
                     <ToggleModalButton
+                        id='channelViewInfo'
                         role='menuitem'
                         dialogType={ChannelInfoModal}
                         dialogProps={{channel}}
@@ -523,11 +538,11 @@ export default class ChannelHeader extends React.Component {
             if (ChannelStore.isDefault(channel)) {
                 dropdownContents.push(
                     <li
-                        id='channelManageMembers'
                         key='manage_members'
                         role='presentation'
                     >
                         <a
+                            id='channelManageMembers'
                             role='menuitem'
                             href='#'
                             onClick={() => this.setState({showMembersModal: true})}
@@ -543,11 +558,11 @@ export default class ChannelHeader extends React.Component {
 
             dropdownContents.push(
                 <li
-                    id='channelNotificationPreferences'
                     key='notification_preferences'
                     role='presentation'
                 >
                     <ToggleModalButton
+                        id='channelNotificationPreferences'
                         role='menuitem'
                         dialogType={ChannelNotificationsModal}
                         dialogProps={{
@@ -575,11 +590,11 @@ export default class ChannelHeader extends React.Component {
                 if (ChannelUtils.canManageMembers(channel, isSystemAdmin, isTeamAdmin, isChannelAdmin)) {
                     dropdownContents.push(
                         <li
-                            id='channelAddMembers'
                             key='add_members'
                             role='presentation'
                         >
                             <ToggleModalButton
+                                id='channelAddMembers'
                                 ref='channelInviteModalButton'
                                 role='menuitem'
                                 dialogType={ChannelInviteModal}
@@ -595,11 +610,11 @@ export default class ChannelHeader extends React.Component {
 
                     dropdownContents.push(
                         <li
-                            id='channelManageMembers'
                             key='manage_members'
                             role='presentation'
                         >
                             <a
+                                id='channelManageMembers'
                                 role='menuitem'
                                 href='#'
                                 onClick={() => this.setState({showMembersModal: true})}
@@ -614,11 +629,11 @@ export default class ChannelHeader extends React.Component {
                 } else {
                     dropdownContents.push(
                         <li
-                            id='channelViewMembers'
                             key='view_members'
                             role='presentation'
                         >
                             <a
+                                id='channelViewMembers'
                                 role='menuitem'
                                 href='#'
                                 onClick={() => this.setState({showMembersModal: true})}
@@ -635,11 +650,11 @@ export default class ChannelHeader extends React.Component {
 
             const deleteOption = (
                 <li
-                    id='channelDelete'
                     key='delete_channel'
                     role='presentation'
                 >
                     <ToggleModalButton
+                        id='channelDelete'
                         role='menuitem'
                         dialogType={DeleteChannelModal}
                         dialogProps={{channel}}
@@ -662,11 +677,11 @@ export default class ChannelHeader extends React.Component {
 
                 dropdownContents.push(
                     <li
-                        id='channelEditHeader'
                         key='set_channel_header'
                         role='presentation'
                     >
                         <ToggleModalButton
+                            id='channelEditHeader'
                             role='menuitem'
                             dialogType={EditChannelHeaderModal}
                             dialogProps={{channel}}
@@ -681,11 +696,11 @@ export default class ChannelHeader extends React.Component {
 
                 dropdownContents.push(
                     <li
-                        id='channelEditPurpose'
                         key='set_channel_purpose'
                         role='presentation'
                     >
                         <a
+                            id='channelEditPurpose'
                             role='menuitem'
                             href='#'
                             onClick={() => this.setState({showEditChannelPurposeModal: true})}
@@ -700,11 +715,11 @@ export default class ChannelHeader extends React.Component {
 
                 dropdownContents.push(
                     <li
-                        id='channelRename'
                         key='rename_channel'
                         role='presentation'
                     >
                         <a
+                            id='channelRename'
                             role='menuitem'
                             href='#'
                             onClick={this.showRenameChannelModal}
@@ -718,11 +733,7 @@ export default class ChannelHeader extends React.Component {
                 );
             }
 
-            if (ChannelUtils.showDeleteOption(channel, isAdmin, isSystemAdmin, isChannelAdmin)) {
-                if (!ChannelStore.isDefault(channel)) {
-                    dropdownContents.push(deleteOption);
-                }
-            } else if (this.state.userCount === 1) {
+            if (ChannelUtils.showDeleteOption(channel, isAdmin, isSystemAdmin, isChannelAdmin, this.state.userCount)) {
                 dropdownContents.push(deleteOption);
             }
 
@@ -737,11 +748,11 @@ export default class ChannelHeader extends React.Component {
 
                 dropdownContents.push(
                     <li
-                        id='channelLeave'
                         key='leave_channel'
                         role='presentation'
                     >
                         <a
+                            id='channelLeave'
                             role='menuitem'
                             href='#'
                             onClick={this.handleLeave}
@@ -756,11 +767,62 @@ export default class ChannelHeader extends React.Component {
             }
         }
 
-        let headerText;
-        if (this.state.enableFormatting) {
-            headerText = TextFormatting.formatText(channel.header, {singleline: true, mentionHighlight: false, siteURL: getSiteURL()});
+        let headerTextContainer;
+        if (channel.header) {
+            let headerTextElement;
+            if (this.state.enableFormatting) {
+                headerTextElement = (
+                    <div
+                        onClick={Utils.handleFormattedTextClick}
+                        className='channel-header__description'
+                        dangerouslySetInnerHTML={{__html: TextFormatting.formatText(channel.header, {singleline: true, mentionHighlight: false, siteURL: getSiteURL()})}}
+                    />
+                );
+            } else {
+                headerTextElement = (
+                    <div
+                        onClick={Utils.handleFormattedTextClick}
+                        className='channel-header__description'
+                    >
+                        {channel.header}
+                    </div>
+                );
+            }
+
+            headerTextContainer = (
+                <OverlayTrigger
+                    trigger={'click'}
+                    placement='bottom'
+                    rootClose={true}
+                    overlay={popoverContent}
+                    ref='headerOverlay'
+                >
+                    {headerTextElement}
+                </OverlayTrigger>
+            );
         } else {
-            headerText = channel.header;
+            headerTextContainer = (
+                <a
+                    href='#'
+                    className='channel-header__description light'
+                    onClick={() => this.setState({showEditChannelHeaderModal: true})}
+                >
+                    <FormattedMessage
+                        id='channel_header.addChannelHeader'
+                        defaultMessage='Add a channel description'
+                    />
+                </a>
+            );
+        }
+
+        let editHeaderModal;
+        if (this.state.showEditChannelHeaderModal) {
+            editHeaderModal = (
+                <EditChannelHeaderModal
+                    onHide={() => this.setState({showEditChannelHeaderModal: false})}
+                    channel={channel}
+                />
+            );
         }
 
         let toggleFavoriteTooltip;
@@ -786,6 +848,7 @@ export default class ChannelHeader extends React.Component {
 
         const toggleFavorite = (
             <OverlayTrigger
+                trigger={['hover', 'focus']}
                 delayShow={Constants.OVERLAY_TIME_DELAY}
                 placement='bottom'
                 overlay={toggleFavoriteTooltip}
@@ -794,7 +857,7 @@ export default class ChannelHeader extends React.Component {
                     id='toggleFavorite'
                     href='#'
                     onClick={this.toggleFavorite}
-                    className='channel-header__favorites'
+                    className={'channel-header__favorites ' + (this.state.isFavorite ? 'active' : 'inactive')}
                 >
                     <i className={'icon fa ' + (this.state.isFavorite ? 'fa-star' : 'fa-star-o')}/>
                 </a>
@@ -824,19 +887,23 @@ export default class ChannelHeader extends React.Component {
 
         const leaveChannelModal = this.createLeaveChannelModal();
 
+        let pinnedIconClass = 'channel-header__icon';
+        if (this.state.pinsOpen) {
+            pinnedIconClass += ' active';
+        }
+
         return (
             <div
                 id='channel-header'
-                className='channel-header'
+                className='channel-header alt'
             >
-                <table className='channel-header alt'>
+                <table>
                     <tbody>
                         <tr>
                             <th>
                                 <div className='channel-header__info'>
-                                    {webrtc}
                                     {toggleFavorite}
-                                    <div className='dropdown'>
+                                    <div className='channel-header__title dropdown'>
                                         <a
                                             id='channelHeaderDropdown'
                                             href='#'
@@ -846,7 +913,7 @@ export default class ChannelHeader extends React.Component {
                                             aria-expanded='true'
                                         >
                                             <strong className='heading'>{channelTitle} </strong>
-                                            <span className='fa fa-chevron-down header-dropdown__icon'/>
+                                            <span className='fa fa-angle-down header-dropdown__icon'/>
                                         </a>
                                         <ul
                                             className='dropdown-menu'
@@ -856,35 +923,33 @@ export default class ChannelHeader extends React.Component {
                                             {dropdownContents}
                                         </ul>
                                     </div>
-                                    <OverlayTrigger
-                                        trigger={'click'}
-                                        placement='bottom'
-                                        rootClose={true}
-                                        overlay={popoverContent}
-                                        ref='headerOverlay'
-                                    >
-                                        <div
-                                            onClick={Utils.handleFormattedTextClick}
-                                            className='description'
-                                            dangerouslySetInnerHTML={{__html: headerText}}
-                                        />
-                                    </OverlayTrigger>
+                                    {headerTextContainer}
                                 </div>
                             </th>
-                            <th className='header-list__right'>
+                            <th>
+                                {webrtc}
+                            </th>
+                            <th>
                                 {popoverListMembers}
-                                <a
-                                    href='#'
-                                    type='button'
-                                    id='pinnedPostsButton'
-                                    className='pinned-posts-button'
-                                    onClick={this.getPinnedPosts}
+                            </th>
+                            <th>
+                                <OverlayTrigger
+                                    trigger={['hover', 'focus']}
+                                    delayShow={Constants.OVERLAY_TIME_DELAY}
+                                    placement='bottom'
+                                    overlay={pinnedPostTooltip}
                                 >
-                                    <span
-                                        dangerouslySetInnerHTML={{__html: pinIcon}}
-                                        aria-hidden='true'
-                                    />
-                                </a>
+                                    <div
+                                        className={pinnedIconClass}
+                                        onClick={this.getPinnedPosts}
+                                    >
+                                        <span
+                                            className='icon icon__pin'
+                                            dangerouslySetInnerHTML={{__html: pinIcon}}
+                                            aria-hidden='true'
+                                        />
+                                    </div>
+                                </OverlayTrigger>
                             </th>
                             <th className='search-bar__container'>
                                 <NavbarSearchBox
@@ -893,47 +958,47 @@ export default class ChannelHeader extends React.Component {
                                 />
                             </th>
                             <th>
-                                <div className='dropdown channel-header__links search-btns'>
-                                    <OverlayTrigger
-                                        delayShow={Constants.OVERLAY_TIME_DELAY}
-                                        placement='bottom'
-                                        overlay={recentMentionsTooltip}
+                                <OverlayTrigger
+                                    trigger={['hover', 'focus']}
+                                    delayShow={Constants.OVERLAY_TIME_DELAY}
+                                    placement='bottom'
+                                    overlay={recentMentionsTooltip}
+                                >
+                                    <div
+                                        className='channel-header__icon icon--hidden'
+                                        onClick={this.searchMentions}
                                     >
-                                        <a
-                                            id='searchMentions'
-                                            href='#'
-                                            type='button'
-                                            onClick={this.searchMentions}
-                                        >
-                                            {'@'}
-                                        </a>
-                                    </OverlayTrigger>
-                                </div>
+                                        <span
+                                            className='icon icon__mentions'
+                                            dangerouslySetInnerHTML={{__html: mentionsIcon}}
+                                            aria-hidden='true'
+                                        />
+                                    </div>
+                                </OverlayTrigger>
                             </th>
                             <th>
-                                <div className='dropdown channel-header__links search-btns'>
-                                    <OverlayTrigger
-                                        delayShow={Constants.OVERLAY_TIME_DELAY}
-                                        placement='bottom'
-                                        overlay={flaggedTooltip}
+                                <OverlayTrigger
+                                    trigger={['hover', 'focus']}
+                                    delayShow={Constants.OVERLAY_TIME_DELAY}
+                                    placement='bottom'
+                                    overlay={flaggedTooltip}
+                                >
+                                    <div
+                                        className='channel-header__icon icon--hidden'
+                                        onClick={this.getFlagged}
+
                                     >
-                                        <a
-                                            id='flaggedPostsButton'
-                                            href='#'
-                                            type='button'
-                                            onClick={this.getFlagged}
-                                        >
-                                            <span
-                                                className='icon icon__flag'
-                                                dangerouslySetInnerHTML={{__html: flagIcon}}
-                                            />
-                                        </a>
-                                    </OverlayTrigger>
-                                </div>
+                                        <span
+                                            className='icon icon__flag'
+                                            dangerouslySetInnerHTML={{__html: flagIcon}}
+                                        />
+                                    </div>
+                                </OverlayTrigger>
                             </th>
                         </tr>
                     </tbody>
                 </table>
+                {editHeaderModal}
                 {editPurposeModal}
                 {channelMembersModal}
                 {leaveChannelModal}
@@ -948,5 +1013,5 @@ export default class ChannelHeader extends React.Component {
 }
 
 ChannelHeader.propTypes = {
-    channelId: React.PropTypes.string.isRequired
+    channelId: PropTypes.string.isRequired
 };

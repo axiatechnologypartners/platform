@@ -49,23 +49,23 @@
   },
   {
     "id": "api.admin.add_certificate.no_file.app_error",
-    "translation": "请求中'certificate'下的文件不存在"
+    "translation": "请求中'certificate'下的文件不存在。"
   },
   {
     "id": "api.admin.add_certificate.open.app_error",
-    "translation": "无法打开证书文件"
+    "translation": "无法打开证书文件。"
   },
   {
     "id": "api.admin.add_certificate.saving.app_error",
-    "translation": "无法保存证书文件"
+    "translation": "无法保存证书文件。"
   },
   {
     "id": "api.admin.file_read_error",
-    "translation": "读取日志文件出错"
+    "translation": "读取日志文件出错。"
   },
   {
     "id": "api.admin.get_brand_image.not_available.app_error",
-    "translation": "此服务器不支持或没有正确配置自定义品牌"
+    "translation": "此服务器不支持或没有正确配置自定义品牌。"
   },
   {
     "id": "api.admin.get_brand_image.storage.app_error",
@@ -73,15 +73,15 @@
   },
   {
     "id": "api.admin.init.debug",
-    "translation": "正在初始化管理 API 路由"
+    "translation": "正在初始化管理 API 路由。"
   },
   {
     "id": "api.admin.recycle_db_end.warn",
-    "translation": "数据库连接重用完成"
+    "translation": "数据库连接重用完成。"
   },
   {
     "id": "api.admin.recycle_db_start.warn",
-    "translation": "正在尝试重用数据库连接"
+    "translation": "正在尝试重用数据库连接。"
   },
   {
     "id": "api.admin.remove_certificate.delete.app_error",
@@ -89,7 +89,7 @@
   },
   {
     "id": "api.admin.saml.metadata.app_error",
-    "translation": "创建服务商元数据时发生错误"
+    "translation": "创建服务商元数据时发生错误。"
   },
   {
     "id": "api.admin.test_email.body",
@@ -429,7 +429,7 @@
   },
   {
     "id": "api.command.execute_command.not_found.app_error",
-    "translation": "触发 '{{.Trigger}}' 没有找到"
+    "translation": "未找到拥有触发 '{{.Trigger}}' 的命令。如果像发送以 \"/\" 开头的消息，请在前面加个空格。"
   },
   {
     "id": "api.command.execute_command.save.app_error",
@@ -458,6 +458,10 @@
   {
     "id": "api.command.invite_people.hint",
     "translation": "[name@domain.com ...]"
+  },
+  {
+    "id": "api.command.invite_people.invite_off",
+    "translation": "本服务器已经禁止创建用户，未发送任何邀请"
   },
   {
     "id": "api.command.invite_people.name",
@@ -494,6 +498,38 @@
   {
     "id": "api.command_away.success",
     "translation": "您现在离开了"
+  },
+  {
+    "id": "api.command_channel_header.channel.app_error",
+    "translation": "获取当前频道错误。"
+  },
+  {
+    "id": "api.command_channel_header.desc",
+    "translation": "修改频道标题"
+  },
+  {
+    "id": "api.command_channel_header.hint",
+    "translation": "[文字]"
+  },
+  {
+    "id": "api.command_channel_header.message.app_error",
+    "translation": "比如提供 /header 命令的文字。"
+  },
+  {
+    "id": "api.command_channel_header.name",
+    "translation": "标题"
+  },
+  {
+    "id": "api.command_channel_header.permission.app_error",
+    "translation": "您没有权限更改频道标题。"
+  },
+  {
+    "id": "api.command_channel_header.update_channel.app_error",
+    "translation": "更新当前频道错误。"
+  },
+  {
+    "id": "api.command_channel_header.update_channel.success",
+    "translation": "成功更新频道标题。"
   },
   {
     "id": "api.command_collapse.desc",
@@ -550,6 +586,14 @@
   {
     "id": "api.command_expand_collapse.fail.app_error",
     "translation": "展开预览时发生了错误"
+  },
+  {
+    "id": "api.command_help.desc",
+    "translation": "打开 Mattermost 帮助页面"
+  },
+  {
+    "id": "api.command_help.name",
+    "translation": "帮助"
   },
   {
     "id": "api.command_join.desc",
@@ -660,6 +704,38 @@
     "translation": "您现在在线了"
   },
   {
+    "id": "api.command_open.name",
+    "translation": "打开"
+  },
+  {
+    "id": "api.command_search.desc",
+    "translation": "在消息中搜索文字"
+  },
+  {
+    "id": "api.command_search.hint",
+    "translation": "[文字]"
+  },
+  {
+    "id": "api.command_search.name",
+    "translation": "搜索"
+  },
+  {
+    "id": "api.command_search.unsupported.app_error",
+    "translation": "您的设备不支持搜索命令"
+  },
+  {
+    "id": "api.command_settings.desc",
+    "translation": "打开账户设置对话框"
+  },
+  {
+    "id": "api.command_settings.name",
+    "translation": "设置"
+  },
+  {
+    "id": "api.command_settings.unsupported.app_error",
+    "translation": "您的设备不支持设定命令"
+  },
+  {
     "id": "api.command_shortcuts.browser.channel_next",
     "translation": "{{.ChannelNextCmd}}：您的历史记录里的下一个频道\n"
   },
@@ -756,6 +832,10 @@
     "translation": "ESC：将当前频道所有消息标为已读\n"
   },
   {
+    "id": "api.command_shortcuts.msgs.reply",
+    "translation": "SHIFT+UP (在空输入栏)：回复当前频道最新的消息\n"
+  },
+  {
     "id": "api.command_shortcuts.msgs.reprint_next",
     "translation": "{{.CmdOrCtrl}}+向下键 (在空白输入栏)：重显示您输入的下一条消息或斜杠命令\n"
   },
@@ -766,6 +846,10 @@
   {
     "id": "api.command_shortcuts.name",
     "translation": "快捷键"
+  },
+  {
+    "id": "api.command_shortcuts.nav.direct_messages_menu",
+    "translation": "{{.CmdOrCtrl}}+SHIFT+K：打开私信菜单\n"
   },
   {
     "id": "api.command_shortcuts.nav.header",
@@ -790,6 +874,10 @@
   {
     "id": "api.command_shortcuts.nav.switcher",
     "translation": "{{.CmdOrCtrl}}+K：打开频道快速切换对话框\n"
+  },
+  {
+    "id": "api.command_shortcuts.nav.switcher_team",
+    "translation": "{{.CmdOrCtrl}}+ALT+K：打开团队快速切换对话框\n"
   },
   {
     "id": "api.command_shortcuts.nav.unread_next",
@@ -886,6 +974,10 @@
   {
     "id": "api.context.unknown.app_error",
     "translation": "发生未知错误。请联系我们。"
+  },
+  {
+    "id": "api.context.v3_disabled.app_error",
+    "translation": "API 版本 3 已在本服务器停用。请使用 API 版本 4。详情见 https://api.mattermost.com。"
   },
   {
     "id": "api.deprecated.init.debug",
@@ -1418,6 +1510,10 @@
     "translation": "正在初始化 OAuth API 路由"
   },
   {
+    "id": "api.oauth.invalid_state_token.app_error",
+    "translation": "无效状态令牌"
+  },
+  {
     "id": "api.oauth.regenerate_secret.app_error",
     "translation": "无效重新生成 OAuth2 应用秘钥权限"
   },
@@ -1448,6 +1544,10 @@
   {
     "id": "api.oauth.singup_with_oauth.invalid_link.app_error",
     "translation": "注册链接无效"
+  },
+  {
+    "id": "api.opengraph.init.debug",
+    "translation": "正在初始化 open graph 协议 api 路由"
   },
   {
     "id": "api.post.check_for_out_of_channel_mentions.message.multiple",
@@ -1612,6 +1712,14 @@
     "translation": "新私信"
   },
   {
+    "id": "api.post.send_notifications_and_forget.push_image_only",
+    "translation": " 已上传一个或更多个文件在 "
+  },
+  {
+    "id": "api.post.send_notifications_and_forget.push_image_only_dm",
+    "translation": " 在私信里上传一个或更多个文件"
+  },
+  {
     "id": "api.post.send_notifications_and_forget.push_in",
     "translation": " 在 "
   },
@@ -1626,10 +1734,6 @@
   {
     "id": "api.post.send_notifications_and_forget.push_non_mention",
     "translation": "发布在"
-  },
-  {
-    "id": "api.post.send_notifications_and_forget.push_notification.debug",
-    "translation": "发送拥有信息 '%v' 的推送通知到 %v"
   },
   {
     "id": "api.post.send_notifications_and_forget.push_notification.error",
@@ -1968,12 +2072,8 @@
     "translation": "未找到用户"
   },
   {
-    "id": "api.team.add_user_to_team.invalid_data.app_error",
-    "translation": "无效数据。"
-  },
-  {
-    "id": "api.team.add_user_to_team.invalid_invite_id.app_error",
-    "translation": "无效邀请 id。没有匹配此邀请 id 的团队。"
+    "id": "api.system.go_routines",
+    "translation": "运行中的 goroutine 数量 %v 已经超过健康界限 %v"
   },
   {
     "id": "api.team.add_user_to_team.missing_parameter.app_error",
@@ -2046,6 +2146,10 @@
   {
     "id": "api.team.invite_members.already.app_error",
     "translation": "此人已经在你的团队中"
+  },
+  {
+    "id": "api.team.invite_members.invalid_email.app_error",
+    "translation": "以下邮箱地址不在允许的域名范围内：{{.Addresses}}。请联系您的系统管理员了解详情。"
   },
   {
     "id": "api.team.invite_members.member",
@@ -2273,7 +2377,7 @@
   },
   {
     "id": "api.templates.signin_change_email.subject",
-    "translation": "[{{ .SiteName }}] 您在 {{ .SiteName }} 更新了您的登入方式"
+    "translation": "[{{ .SiteName }}] 您的登入方式已更新"
   },
   {
     "id": "api.templates.signup_team_body.button",
@@ -2462,6 +2566,14 @@
   {
     "id": "api.user.create_user.joining.error",
     "translation": "加入默认通道遇到一个问题 user_id=%s, team_id=%s, err=%v"
+  },
+  {
+    "id": "api.user.create_user.missing_hash_or_data.app_error",
+    "translation": "无效的哈系或 URL 查询数据。"
+  },
+  {
+    "id": "api.user.create_user.missing_invite_id.app_error",
+    "translation": "无效的邀请 id。"
   },
   {
     "id": "api.user.create_user.no_open_server",
@@ -2725,7 +2837,7 @@
   },
   {
     "id": "api.user.upload_profile_user.decode_config.app_error",
-    "translation": "无法解码头像设定。"
+    "translation": "无法保存个人资料图片。文件不是有效的图片。"
   },
   {
     "id": "api.user.upload_profile_user.encode.app_error",
@@ -2932,8 +3044,48 @@
     "translation": "导入频道失败。团队名 \"{{.TeamName}}\" 无法找到。"
   },
   {
+    "id": "app.import.import_direct_channel.create_direct_channel.error",
+    "translation": "船舰私信组频道失败"
+  },
+  {
+    "id": "app.import.import_direct_channel.create_group_channel.error",
+    "translation": "创建群频道失败"
+  },
+  {
+    "id": "app.import.import_direct_channel.member_not_found.error",
+    "translation": "导入私信频道时无法找到频道成员"
+  },
+  {
+    "id": "app.import.import_direct_channel.update_header_failed.error",
+    "translation": "更新私信频道标题失败"
+  },
+  {
+    "id": "app.import.import_direct_post.channel_member_not_found.error",
+    "translation": "导入私信频道消息时无法找到频道成员"
+  },
+  {
+    "id": "app.import.import_direct_post.create_direct_channel.error",
+    "translation": "获取私信频道失败"
+  },
+  {
+    "id": "app.import.import_direct_post.create_group_channel.error",
+    "translation": "获取组频道失败"
+  },
+  {
+    "id": "app.import.import_direct_post.user_not_found.error",
+    "translation": "消息用户不存在"
+  },
+  {
     "id": "app.import.import_line.null_channel.error",
     "translation": "导入数据行有类型 \"channel\" 但频道对象是无。"
+  },
+  {
+    "id": "app.import.import_line.null_direct_channel.error",
+    "translation": "导入数据行有类型 \"direct_channel\" 但 direct_channel 对象为 null。"
+  },
+  {
+    "id": "app.import.import_line.null_direct_post.error",
+    "translation": "导入数据行有类型 \"direct_post\" 但 direct_post 对象为 null。"
   },
   {
     "id": "app.import.import_line.null_post.error",
@@ -2965,7 +3117,7 @@
   },
   {
     "id": "app.import.validate_channel_import_data.create_at_zero.error",
-    "translation": "如果提供频道 create_at 则不能为 0。"
+    "translation": "如果提供频道 create_at 则不能为零。"
   },
   {
     "id": "app.import.validate_channel_import_data.display_name_length.error",
@@ -2973,7 +3125,7 @@
   },
   {
     "id": "app.import.validate_channel_import_data.display_name_missing.error",
-    "translation": "缺少频道必须属性：display_name。"
+    "translation": "缺少频道必须属性：display_name"
   },
   {
     "id": "app.import.validate_channel_import_data.header_length.error",
@@ -3008,6 +3160,54 @@
     "translation": "缺少频道必须属性：type。"
   },
   {
+    "id": "app.import.validate_direct_channel_import_data.header_length.error",
+    "translation": "私信频道标题过长"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_required.error",
+    "translation": "缺少私信频道必须属性：members"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_too_few.error",
+    "translation": "私信频道成员列表数量过少"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_too_many.error",
+    "translation": "私信频道成员列表数量过多"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_required.error",
+    "translation": "缺少私信消息必须属性：channel_members"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_too_few.error",
+    "translation": "私信频道成员列表数量过少"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_too_many.error",
+    "translation": "私信频道成员列表数量过多"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.create_at_missing.error",
+    "translation": "缺少私信消息必须属性：create_at"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.create_at_zero.error",
+    "translation": "CreateAt 比如大于 0"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.message_length.error",
+    "translation": "消息过长"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.message_missing.error",
+    "translation": "缺少私信必须属性：message"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.user_missing.error",
+    "translation": "缺少私信必须属性：user"
+  },
+  {
     "id": "app.import.validate_post_import_data.channel_missing.error",
     "translation": "缺少消息必须属性：Channel。"
   },
@@ -3017,7 +3217,7 @@
   },
   {
     "id": "app.import.validate_post_import_data.create_at_zero.error",
-    "translation": "如果提供消息 CreateAt 则不能为零。"
+    "translation": "如果提供消息 CreateAt 属性则不能为零。"
   },
   {
     "id": "app.import.validate_post_import_data.message_length.error",
@@ -3041,7 +3241,7 @@
   },
   {
     "id": "app.import.validate_team_import_data.create_at_zero.error",
-    "translation": "如果提供团队 create_at 则不能为 0。"
+    "translation": "如果提供团队 create_at 则不能为零。"
   },
   {
     "id": "app.import.validate_team_import_data.description_length.error",
@@ -3053,7 +3253,7 @@
   },
   {
     "id": "app.import.validate_team_import_data.display_name_missing.error",
-    "translation": "缺少频道必须属性：display_name"
+    "translation": "缺少团队必须属性：display_name。"
   },
   {
     "id": "app.import.validate_team_import_data.name_characters.error",
@@ -3077,7 +3277,7 @@
   },
   {
     "id": "app.import.validate_team_import_data.type_missing.error",
-    "translation": "缺少频道必须属性：type"
+    "translation": "缺少频道必须属性：type。"
   },
   {
     "id": "app.import.validate_user_channels_import_data.channel_name_missing.error",
@@ -3097,7 +3297,7 @@
   },
   {
     "id": "app.import.validate_user_import_data.auth_data_and_password.error",
-    "translation": "User AuthData and Password are mutually exclusive."
+    "translation": "用户的 AuthData 和密码是互斥的。"
   },
   {
     "id": "app.import.validate_user_import_data.auth_data_length.error",
@@ -3233,7 +3433,7 @@
   },
   {
     "id": "ent.cluster.config_changed.info",
-    "translation": "id=%v 的机群设定已更改。尝试重启机群服务中。为了确保机群设置正确您不应该依赖此重启因为我们检测到一核心配置改动。"
+    "translation": "机群设定 id={{ .id }} 已更改。机群可能不稳定并且需要重启。为了确保机群配置正确您应该立刻逐进重启。"
   },
   {
     "id": "ent.cluster.debug_fail.debug",
@@ -3265,7 +3465,7 @@
   },
   {
     "id": "ent.cluster.save_config.error",
-    "translation": "系统控制台在高可用性开启时设为只读。"
+    "translation": "当高可用性模式开启时，系统控制台将设为只读且只能通过修改配置文件进行改动除非禁止配置文件里的 ReadOnlyConfig。"
   },
   {
     "id": "ent.cluster.starting.info",
@@ -3294,6 +3494,46 @@
   {
     "id": "ent.compliance.run_started.info",
     "translation": "导出审核自'{{.FilePath}}'的'{{.JobName}}'任务开始"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.disabled",
+    "translation": "ElasticSearch 搜索已在本服务器禁用"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.search_failed",
+    "translation": "搜索无法完成"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.unmarshall_post_failed",
+    "translation": "解码搜索结果失败"
+  },
+  {
+    "id": "ent.elasticsearch.start.connect_failed",
+    "translation": "设置 ElasticSearch 客户端失败"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_create_failed",
+    "translation": "创建 ElasticSearch 索引失败"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_exists_failed",
+    "translation": "无法确认 ElasticSearch 索引是否存在"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_mapping_failed",
+    "translation": "无法配置 ElasticSearch 索引映像"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_settings_failed",
+    "translation": "无法设置 ElasticSearch 索引设定"
+  },
+  {
+    "id": "ent.elasticsearch.test_config.indexing_disabled.error",
+    "translation": "Elasticsearch 已停用。"
+  },
+  {
+    "id": "ent.elasticsearch.test_config.license.error",
+    "translation": "许可证不支持 Elasticsearch。"
   },
   {
     "id": "ent.emoji.licence_disable.app_error",
@@ -3852,6 +4092,22 @@
     "translation": "当机群启用时没法启动批量电子邮件。"
   },
   {
+    "id": "model.config.is_valid.elastic_search.connection_url.app_error",
+    "translation": "当 Elastic Search 索引开启时必须提供 Elastic Search ConnectionUrl 设定。"
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.enable_searching.app_error",
+    "translation": "当 Elastic Search SearchEnabled 设为是时必须设定 Elastic Search IndexingEnabled 为是。"
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.password.app_error",
+    "translation": "当 Elastic Search 索引开启时必须提供 Elastic Search 密码设定。"
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.username.app_error",
+    "translation": "当 Elastic Search 索引开启时必须提供 Elastic Search 用户名设定。"
+  },
+  {
     "id": "model.config.is_valid.email_batching_buffer_size.app_error",
     "translation": "无效的批量电子邮件缓存大小设定。必须为零或者正整数。"
   },
@@ -4074,6 +4330,14 @@
   {
     "id": "model.config.is_valid.sql_max_conn.app_error",
     "translation": "SQL 设置中最大开启连接数无效。必须是正整数。"
+  },
+  {
+    "id": "model.config.is_valid.sql_query_timeout.app_error",
+    "translation": "无效 SQL 查询超时设定。必须是正整数。"
+  },
+  {
+    "id": "model.config.is_valid.teammate_name_display.app_error",
+    "translation": "无效的团员显示。必须为 'full_name'，'nickname_full_name' 或 'username'"
   },
   {
     "id": "model.config.is_valid.time_between_user_typing.app_error",
@@ -4632,14 +4896,6 @@
     "translation": "打开数据库连接失败 %v"
   },
   {
-    "id": "store.sql.ping.critical",
-    "translation": "ping 数据库失败 err:%v"
-  },
-  {
-    "id": "store.sql.pinging.info",
-    "translation": "Pinging sql %v 数据库"
-  },
-  {
     "id": "store.sql.read_replicas_not_licensed.critical",
     "translation": "当前许可证禁止大于1个读取复制。请联系您的系统管理员关于升级您的企业许可证。"
   },
@@ -5036,6 +5292,30 @@
     "translation": "我们无法保存文件信息"
   },
   {
+    "id": "store.sql_file_info.save_or_update.app_error",
+    "translation": "我们无法保存或更新文件信息"
+  },
+  {
+    "id": "store.sql_job_status.delete_by_type.app_error",
+    "translation": "我们不能删除这个作业状态"
+  },
+  {
+    "id": "store.sql_job_status.get.app_error",
+    "translation": "我们无法获取这个作业状态"
+  },
+  {
+    "id": "store.sql_job_status.get_all.app_error",
+    "translation": "我们无法获取所有作业状态"
+  },
+  {
+    "id": "store.sql_job_status.save.app_error",
+    "translation": "我们无法保存这个作业状态"
+  },
+  {
+    "id": "store.sql_job_status.update.app_error",
+    "translation": "我们不能更新这个作业状态"
+  },
+  {
     "id": "store.sql_license.get.app_error",
     "translation": "我们获取许可证时出现一个错误"
   },
@@ -5182,6 +5462,10 @@
   {
     "id": "store.sql_post.get_posts_around.get_parent.app_error",
     "translation": "我们无法获取这个频道的父信息"
+  },
+  {
+    "id": "store.sql_post.get_posts_by_ids.app_error",
+    "translation": "我们无法获取消息"
   },
   {
     "id": "store.sql_post.get_posts_created_att.app_error",
@@ -5608,6 +5892,10 @@
     "translation": "我们发现多个用户的登陆凭据与你匹配，因此禁用了你的登陆权限。请与管理员联系。"
   },
   {
+    "id": "store.sql_user.get_new_users.app_error",
+    "translation": "我们在查找新用户时发生错误"
+  },
+  {
     "id": "store.sql_user.get_profiles.app_error",
     "translation": "我们查找用户配置文件遇到了一个错误"
   },
@@ -5896,6 +6184,10 @@
     "translation": "遇到错误签名许可证, err=%v"
   },
   {
+    "id": "utils.mail.connect_smtp.helo.app_error",
+    "translation": "设置 HELO 失败"
+  },
+  {
     "id": "utils.mail.connect_smtp.open.app_error",
     "translation": "打开连接失败"
   },
@@ -5908,6 +6200,10 @@
     "translation": "无法验证SMTP服务器"
   },
   {
+    "id": "utils.mail.new_client.helo.error",
+    "translation": "设置 HELO 给 SMTP 服务器 %v 失败"
+  },
+  {
     "id": "utils.mail.new_client.open.error",
     "translation": "无法打开一个SMTP服务器连接 %v"
   },
@@ -5917,7 +6213,7 @@
   },
   {
     "id": "utils.mail.send_mail.from_address.app_error",
-    "translation": "未能从电子邮件地址添加"
+    "translation": "缺少或无效的从寄件人地址通知设定。"
   },
   {
     "id": "utils.mail.send_mail.msg.app_error",
@@ -5933,7 +6229,7 @@
   },
   {
     "id": "utils.mail.send_mail.to_address.app_error",
-    "translation": "添加邮箱地址失败"
+    "translation": "缺少或无效的通知到收件人地址设定。"
   },
   {
     "id": "utils.mail.test.configured.error",

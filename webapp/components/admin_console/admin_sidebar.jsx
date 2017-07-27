@@ -2,6 +2,7 @@
 // See License.txt for license information.
 
 import $ from 'jquery';
+import PropTypes from 'prop-types';
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
@@ -14,7 +15,7 @@ import AdminSidebarSection from './admin_sidebar_section.jsx';
 export default class AdminSidebar extends React.Component {
     static get contextTypes() {
         return {
-            router: React.PropTypes.object.isRequired
+            router: PropTypes.object.isRequired
         };
     }
 
@@ -256,6 +257,21 @@ export default class AdminSidebar extends React.Component {
                 }
             />
         );
+
+        let elasticSearchSettings = null;
+        if (window.mm_license.IsLicensed === 'true') {
+            elasticSearchSettings = (
+                <AdminSidebarSection
+                    name='elasticsearch'
+                    title={
+                        <FormattedMessage
+                            id='admin.sidebar.elasticsearch'
+                            defaultMessage='Elasticsearch'
+                        />
+                    }
+                />
+            );
+        }
 
         return (
             <div className='admin-sidebar'>
@@ -528,20 +544,12 @@ export default class AdminSidebar extends React.Component {
                                 }
                             >
                                 <AdminSidebarSection
+                                    key='storage'
                                     name='storage'
                                     title={
                                         <FormattedMessage
                                             id='admin.sidebar.storage'
                                             defaultMessage='Storage'
-                                        />
-                                    }
-                                />
-                                <AdminSidebarSection
-                                    name='images'
-                                    title={
-                                        <FormattedMessage
-                                            id='admin.sidebar.images'
-                                            defaultMessage='Images'
                                         />
                                     }
                                 />
@@ -558,11 +566,11 @@ export default class AdminSidebar extends React.Component {
                             >
                                 {customBranding}
                                 <AdminSidebarSection
-                                    name='custom_emoji'
+                                    name='emoji'
                                     title={
                                         <FormattedMessage
-                                            id='admin.sidebar.customEmoji'
-                                            defaultMessage='Custom Emoji'
+                                            id='admin.sidebar.emoji'
+                                            defaultMessage='Emoji'
                                         />
 
                                     }
@@ -625,6 +633,7 @@ export default class AdminSidebar extends React.Component {
                                         />
                                     }
                                 />
+                                {elasticSearchSettings}
                                 <AdminSidebarSection
                                     name='developer'
                                     title={

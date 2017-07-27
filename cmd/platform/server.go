@@ -14,6 +14,7 @@ import (
 	"github.com/mattermost/platform/api4"
 	"github.com/mattermost/platform/app"
 	"github.com/mattermost/platform/einterfaces"
+	"github.com/mattermost/platform/jobs"
 	"github.com/mattermost/platform/manualtesting"
 	"github.com/mattermost/platform/model"
 	"github.com/mattermost/platform/utils"
@@ -43,12 +44,16 @@ func runServerCmd(cmd *cobra.Command, args []string) error {
 }
 
 func runServer(configFileLocation string) {
-	if errstr := doLoadConfig(configFileLocation); errstr != "" {
-		l4g.Exit("Unable to load mattermost configuration file: ", errstr)
+	if err := utils.InitAndLoadConfig(configFileLocation); err != nil {
+		l4g.Exit("Unable to load Mattermost configuration file: ", err)
 		return
 	}
 
-	utils.InitTranslations(utils.Cfg.LocalizationSettings)
+	if err := utils.InitTranslations(utils.Cfg.LocalizationSettings); err != nil {
+		l4g.Exit("Unable to load Mattermost translation files: %v", err)
+		return
+	}
+
 	utils.TestConnection(utils.Cfg)
 
 	pwd, _ := os.Getwd()
@@ -107,12 +112,23 @@ func runServer(configFileLocation string) {
 	}
 
 	if einterfaces.GetClusterInterface() != nil {
+		app.RegisterAllClusterMessageHandlers()
 		einterfaces.GetClusterInterface().StartInterNodeCommunication()
 	}
 
 	if einterfaces.GetMetricsInterface() != nil {
 		einterfaces.GetMetricsInterface().StartServer()
 	}
+
+	if einterfaces.GetElasticsearchInterface() != nil {
+		if err := einterfaces.GetElasticsearchInterface().Start(); err != nil {
+			l4g.Error(err.Error())
+		}
+	}
+
+	jobs.Srv.Store = app.Srv.Store
+	jobs.Srv.StartWorkers()
+	jobs.Srv.StartSchedulers()
 
 	// wait for kill signal before attempting to gracefully shutdown
 	// the running service
@@ -127,6 +143,9 @@ func runServer(configFileLocation string) {
 	if einterfaces.GetMetricsInterface() != nil {
 		einterfaces.GetMetricsInterface().StopServer()
 	}
+
+	jobs.Srv.StopSchedulers()
+	jobs.Srv.StopWorkers()
 
 	app.StopServer()
 }

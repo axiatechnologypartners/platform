@@ -16,14 +16,23 @@ import (
 )
 
 const (
-	ME                      = "me"
-	USER_NOTIFY_ALL         = "all"
-	USER_NOTIFY_MENTION     = "mention"
-	USER_NOTIFY_NONE        = "none"
-	DESKTOP_NOTIFY_PROP     = "desktop"
-	MARK_UNREAD_NOTIFY_PROP = "mark_unread"
-	PUSH_NOTIFY_PROP        = "push"
-	EMAIL_NOTIFY_PROP       = "email"
+	ME                           = "me"
+	USER_NOTIFY_ALL              = "all"
+	USER_NOTIFY_MENTION          = "mention"
+	USER_NOTIFY_NONE             = "none"
+	DESKTOP_NOTIFY_PROP          = "desktop"
+	DESKTOP_SOUND_NOTIFY_PROP    = "desktop_sound"
+	DESKTOP_DURATION_NOTIFY_PROP = "desktop_duration"
+	MARK_UNREAD_NOTIFY_PROP      = "mark_unread"
+	PUSH_NOTIFY_PROP             = "push"
+	PUSH_STATUS_NOTIFY_PROP      = "push_status"
+	EMAIL_NOTIFY_PROP            = "email"
+	CHANNEL_MENTIONS_NOTIFY_PROP = "channel"
+	COMMENTS_NOTIFY_PROP         = "comments"
+	MENTION_KEYS_NOTIFY_PROP     = "mention_keys"
+	COMMENTS_NOTIFY_NEVER        = "never"
+	COMMENTS_NOTIFY_ROOT         = "root"
+	COMMENTS_NOTIFY_ANY          = "any"
 
 	DEFAULT_LOCALE          = "en"
 	USER_AUTH_SERVICE_EMAIL = "email"
@@ -340,7 +349,6 @@ func (u *User) ClearNonProfileFields() {
 	u.Props = StringMap{}
 	u.NotifyProps = StringMap{}
 	u.LastPasswordUpdate = 0
-	u.LastPictureUpdate = 0
 	u.FailedAttempts = 0
 }
 
@@ -384,26 +392,16 @@ func (u *User) GetFullName() string {
 	}
 }
 
-func (u *User) GetDisplayName() string {
-	if u.Nickname != "" {
-		return u.Nickname
-	} else if fullName := u.GetFullName(); fullName != "" {
-		return fullName
-	} else {
-		return u.Username
-	}
-}
-
-func (u *User) GetDisplayNameForPreference(nameFormat string) string {
+func (u *User) GetDisplayName(nameFormat string) string {
 	displayName := u.Username
 
-	if nameFormat == PREFERENCE_VALUE_DISPLAY_NAME_NICKNAME {
+	if nameFormat == SHOW_NICKNAME_FULLNAME {
 		if u.Nickname != "" {
 			displayName = u.Nickname
 		} else if fullName := u.GetFullName(); fullName != "" {
 			displayName = fullName
 		}
-	} else if nameFormat == PREFERENCE_VALUE_DISPLAY_NAME_FULL {
+	} else if nameFormat == SHOW_FULLNAME {
 		if fullName := u.GetFullName(); fullName != "" {
 			displayName = fullName
 		}
@@ -458,31 +456,25 @@ func IsInRole(userRoles string, inRole string) bool {
 		if r == inRole {
 			return true
 		}
-
 	}
 
 	return false
 }
 
 func (u *User) IsSSOUser() bool {
-	if u.AuthService != "" && u.AuthService != USER_AUTH_SERVICE_EMAIL {
-		return true
-	}
-	return false
+	return u.AuthService != "" && u.AuthService != USER_AUTH_SERVICE_EMAIL
 }
 
 func (u *User) IsOAuthUser() bool {
-	if u.AuthService == USER_AUTH_SERVICE_GITLAB {
-		return true
-	}
-	return false
+	return u.AuthService == USER_AUTH_SERVICE_GITLAB
 }
 
 func (u *User) IsLDAPUser() bool {
-	if u.AuthService == USER_AUTH_SERVICE_LDAP {
-		return true
-	}
-	return false
+	return u.AuthService == USER_AUTH_SERVICE_LDAP
+}
+
+func (u *User) IsSAMLUser() bool {
+	return u.AuthService == USER_AUTH_SERVICE_SAML
 }
 
 // UserFromJson will decode the input and return a User
@@ -620,4 +612,22 @@ func CleanUsername(s string) string {
 	}
 
 	return s
+}
+
+func IsValidUserNotifyLevel(notifyLevel string) bool {
+	return notifyLevel == CHANNEL_NOTIFY_ALL ||
+		notifyLevel == CHANNEL_NOTIFY_MENTION ||
+		notifyLevel == CHANNEL_NOTIFY_NONE
+}
+
+func IsValidPushStatusNotifyLevel(notifyLevel string) bool {
+	return notifyLevel == STATUS_ONLINE ||
+		notifyLevel == STATUS_AWAY ||
+		notifyLevel == STATUS_OFFLINE
+}
+
+func IsValidCommentsNotifyLevel(notifyLevel string) bool {
+	return notifyLevel == COMMENTS_NOTIFY_ANY ||
+		notifyLevel == COMMENTS_NOTIFY_ROOT ||
+		notifyLevel == COMMENTS_NOTIFY_NEVER
 }

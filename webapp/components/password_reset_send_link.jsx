@@ -4,9 +4,11 @@
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
 import * as Utils from 'utils/utils.jsx';
-import client from 'client/web_client.jsx';
+import {sendPasswordResetEmail} from 'actions/user_actions.jsx';
 
 import {FormattedMessage, FormattedHTMLMessage} from 'react-intl';
+
+import PropTypes from 'prop-types';
 
 import React from 'react';
 import {Link} from 'react-router/es6';
@@ -43,7 +45,7 @@ class PasswordResetSendLink extends React.Component {
             error: ''
         });
 
-        client.sendPasswordReset(
+        sendPasswordResetEmail(
             email,
             () => {
                 this.setState({
@@ -148,7 +150,7 @@ class PasswordResetSendLink extends React.Component {
 PasswordResetSendLink.defaultProps = {
 };
 PasswordResetSendLink.propTypes = {
-    params: React.PropTypes.object.isRequired
+    params: PropTypes.object.isRequired
 };
 
 export default PasswordResetSendLink;

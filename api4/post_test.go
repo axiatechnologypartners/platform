@@ -4,9 +4,13 @@
 package api4
 
 import (
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -55,7 +59,7 @@ func TestCreatePost(t *testing.T) {
 	_, resp = Client.CreatePost(post)
 	CheckBadRequestStatus(t, resp)
 
-	post2 := &model.Post{ChannelId: th.BasicChannel2.Id, Message: "a" + model.NewId() + "a", CreateAt: 123}
+	post2 := &model.Post{ChannelId: th.BasicChannel2.Id, Message: "zz" + model.NewId() + "a", CreateAt: 123}
 	rpost2, resp := Client.CreatePost(post2)
 
 	if rpost2.CreateAt == post2.CreateAt {
@@ -101,6 +105,158 @@ func TestCreatePost(t *testing.T) {
 	}
 }
 
+func testCreatePostWithOutgoingHook(
+	t *testing.T,
+	hookContentType, expectedContentType, message, triggerWord string,
+	fileIds []string,
+	triggerWhen int,
+) {
+	th := Setup().InitBasic().InitSystemAdmin()
+	defer TearDown()
+	user := th.SystemAdminUser
+	team := th.BasicTeam
+	channel := th.BasicChannel
+
+	enableOutgoingHooks := utils.Cfg.ServiceSettings.EnableOutgoingWebhooks
+	enableAdminOnlyHooks := utils.Cfg.ServiceSettings.EnableOnlyAdminIntegrations
+	defer func() {
+		utils.Cfg.ServiceSettings.EnableOutgoingWebhooks = enableOutgoingHooks
+		utils.Cfg.ServiceSettings.EnableOnlyAdminIntegrations = enableAdminOnlyHooks
+		utils.SetDefaultRolesBasedOnConfig()
+	}()
+	utils.Cfg.ServiceSettings.EnableOutgoingWebhooks = true
+	*utils.Cfg.ServiceSettings.EnableOnlyAdminIntegrations = true
+	utils.SetDefaultRolesBasedOnConfig()
+
+	var hook *model.OutgoingWebhook
+	var post *model.Post
+
+	// Create a test server that is the target of the outgoing webhook. It will
+	// validate the webhook body fields and write to the success channel on
+	// success/failure.
+	success := make(chan bool)
+	wait := make(chan bool, 1)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-wait
+
+		requestContentType := r.Header.Get("Content-Type")
+		if requestContentType != expectedContentType {
+			t.Logf("Content-Type is %s, should be %s", requestContentType, expectedContentType)
+			success <- false
+			return
+		}
+
+		expectedPayload := &model.OutgoingWebhookPayload{
+			Token:       hook.Token,
+			TeamId:      hook.TeamId,
+			TeamDomain:  team.Name,
+			ChannelId:   post.ChannelId,
+			ChannelName: channel.Name,
+			Timestamp:   post.CreateAt,
+			UserId:      post.UserId,
+			UserName:    user.Username,
+			PostId:      post.Id,
+			Text:        post.Message,
+			TriggerWord: triggerWord,
+			FileIds:     strings.Join(post.FileIds, ","),
+		}
+
+		// depending on the Content-Type, we expect to find a JSON or form encoded payload
+		if requestContentType == "application/json" {
+			decoder := json.NewDecoder(r.Body)
+			o := &model.OutgoingWebhookPayload{}
+			decoder.Decode(&o)
+
+			if !reflect.DeepEqual(expectedPayload, o) {
+				t.Logf("JSON payload is %+v, should be %+v", o, expectedPayload)
+				success <- false
+				return
+			}
+		} else {
+			err := r.ParseForm()
+			if err != nil {
+				t.Logf("Error parsing form: %q", err)
+				success <- false
+				return
+			}
+
+			expectedFormValues, _ := url.ParseQuery(expectedPayload.ToFormValues())
+			if !reflect.DeepEqual(expectedFormValues, r.Form) {
+				t.Logf("Form values are: %q\n, should be: %q\n", r.Form, expectedFormValues)
+				success <- false
+				return
+			}
+		}
+
+		success <- true
+	}))
+	defer ts.Close()
+
+	// create an outgoing webhook, passing it the test server URL
+	var triggerWords []string
+	if triggerWord != "" {
+		triggerWords = []string{triggerWord}
+	}
+	
+	hook = &model.OutgoingWebhook{
+		ChannelId:    channel.Id,
+		TeamId:       team.Id,
+		ContentType:  hookContentType,
+		TriggerWords: triggerWords,
+		TriggerWhen:  triggerWhen,
+		CallbackURLs: []string{ts.URL},
+	}
+
+	hook, resp := th.SystemAdminClient.CreateOutgoingWebhook(hook)
+	CheckNoError(t, resp)
+
+	// create a post to trigger the webhook
+	post = &model.Post{
+		ChannelId: channel.Id,
+		Message:   message,
+		FileIds:   fileIds,
+	}
+
+	post, resp = th.SystemAdminClient.CreatePost(post)
+	CheckNoError(t, resp)
+
+	wait <- true
+
+	// We wait for the test server to write to the success channel and we make
+	// the test fail if that doesn't happen before the timeout.
+	select {
+	case ok := <-success:
+		if !ok {
+			t.Fatal("Test server did send an invalid webhook.")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Timeout, test server did not send the webhook.")
+	}
+}
+
+func TestCreatePostWithOutgoingHook_form_urlencoded(t *testing.T) {
+	testCreatePostWithOutgoingHook(t, "application/x-www-form-urlencoded", "application/x-www-form-urlencoded", "triggerword lorem ipsum", "triggerword", []string{"file_id_1"}, app.TRIGGERWORDS_EXACT_MATCH)
+	testCreatePostWithOutgoingHook(t, "application/x-www-form-urlencoded", "application/x-www-form-urlencoded", "triggerwordaaazzz lorem ipsum", "triggerword", []string{"file_id_1"}, app.TRIGGERWORDS_STARTS_WITH)
+	testCreatePostWithOutgoingHook(t, "application/x-www-form-urlencoded", "application/x-www-form-urlencoded", "", "", []string{"file_id_1"}, app.TRIGGERWORDS_EXACT_MATCH)
+	testCreatePostWithOutgoingHook(t, "application/x-www-form-urlencoded", "application/x-www-form-urlencoded", "", "", []string{"file_id_1"}, app.TRIGGERWORDS_STARTS_WITH)
+}
+
+func TestCreatePostWithOutgoingHook_json(t *testing.T) {
+	testCreatePostWithOutgoingHook(t, "application/json", "application/json", "triggerword lorem ipsum", "triggerword", []string{"file_id_1, file_id_2"}, app.TRIGGERWORDS_EXACT_MATCH)
+	testCreatePostWithOutgoingHook(t, "application/json", "application/json", "triggerwordaaazzz lorem ipsum", "triggerword", []string{"file_id_1, file_id_2"}, app.TRIGGERWORDS_STARTS_WITH)
+	testCreatePostWithOutgoingHook(t, "application/json", "application/json", "triggerword lorem ipsum", "", []string{"file_id_1"}, app.TRIGGERWORDS_EXACT_MATCH)
+	testCreatePostWithOutgoingHook(t, "application/json", "application/json", "triggerwordaaazzz lorem ipsum", "", []string{"file_id_1"}, app.TRIGGERWORDS_STARTS_WITH)
+}
+
+// hooks created before we added the ContentType field should be considered as
+// application/x-www-form-urlencoded
+func TestCreatePostWithOutgoingHook_no_content_type(t *testing.T) {
+	testCreatePostWithOutgoingHook(t, "", "application/x-www-form-urlencoded", "triggerword lorem ipsum", "triggerword", []string{"file_id_1"}, app.TRIGGERWORDS_EXACT_MATCH)
+	testCreatePostWithOutgoingHook(t, "", "application/x-www-form-urlencoded", "triggerwordaaazzz lorem ipsum", "triggerword", []string{"file_id_1"}, app.TRIGGERWORDS_STARTS_WITH)
+	testCreatePostWithOutgoingHook(t, "", "application/x-www-form-urlencoded", "triggerword lorem ipsum", "", []string{"file_id_1, file_id_2"}, app.TRIGGERWORDS_EXACT_MATCH)
+	testCreatePostWithOutgoingHook(t, "", "application/x-www-form-urlencoded", "triggerwordaaazzz lorem ipsum", "", []string{"file_id_1, file_id_2"}, app.TRIGGERWORDS_STARTS_WITH)
+}
+
 func TestUpdatePost(t *testing.T) {
 	th := Setup().InitBasic().InitSystemAdmin()
 	defer TearDown()
@@ -123,7 +279,7 @@ func TestUpdatePost(t *testing.T) {
 	*utils.Cfg.ServiceSettings.AllowEditPost = model.ALLOW_EDIT_POST_ALWAYS
 	utils.SetDefaultRolesBasedOnConfig()
 
-	post := &model.Post{ChannelId: channel.Id, Message: "a" + model.NewId() + "a"}
+	post := &model.Post{ChannelId: channel.Id, Message: "zz" + model.NewId() + "a"}
 	rpost, resp := Client.CreatePost(post)
 	CheckNoError(t, resp)
 
@@ -135,8 +291,10 @@ func TestUpdatePost(t *testing.T) {
 		t.Fatal("Newly created post shouldn't have EditAt set")
 	}
 
-	msg := "a" + model.NewId() + " update post"
+	msg := "zz" + model.NewId() + " update post"
 	rpost.Message = msg
+	rpost.UserId = ""
+
 	rupost, resp := Client.UpdatePost(rpost.Id, rpost)
 	CheckNoError(t, resp)
 
@@ -156,11 +314,11 @@ func TestUpdatePost(t *testing.T) {
 		t.Fatal("failed to updates")
 	}
 
-	post2 := &model.Post{ChannelId: channel.Id, Message: "a" + model.NewId() + "a", Type: model.POST_JOIN_LEAVE}
+	post2 := &model.Post{ChannelId: channel.Id, Message: "zz" + model.NewId() + "a", Type: model.POST_JOIN_LEAVE}
 	rpost2, resp := Client.CreatePost(post2)
 	CheckNoError(t, resp)
 
-	up2 := &model.Post{Id: rpost2.Id, ChannelId: channel.Id, Message: "a" + model.NewId() + " update post 2"}
+	up2 := &model.Post{Id: rpost2.Id, ChannelId: channel.Id, Message: "zz" + model.NewId() + " update post 2"}
 	_, resp = Client.UpdatePost(rpost2.Id, up2)
 	CheckBadRequestStatus(t, resp)
 
@@ -360,10 +518,12 @@ func TestGetPostsForChannel(t *testing.T) {
 
 	post1 := th.CreatePost()
 	post2 := th.CreatePost()
-	post3 := &model.Post{ChannelId: th.BasicChannel.Id, Message: "a" + model.NewId() + "a", RootId: post1.Id}
+	post3 := &model.Post{ChannelId: th.BasicChannel.Id, Message: "zz" + model.NewId() + "a", RootId: post1.Id}
 	post3, _ = Client.CreatePost(post3)
 
-	time := model.GetMillis()
+	time.Sleep(300 * time.Millisecond)
+	since := model.GetMillis()
+	time.Sleep(300 * time.Millisecond)
 
 	post4 := th.CreatePost()
 
@@ -420,7 +580,7 @@ func TestGetPostsForChannel(t *testing.T) {
 
 	post5 := th.CreatePost()
 
-	posts, resp = Client.GetPostsSince(th.BasicChannel.Id, time)
+	posts, resp = Client.GetPostsSince(th.BasicChannel.Id, since)
 	CheckNoError(t, resp)
 
 	if len(posts.Posts) != 2 {
@@ -430,7 +590,7 @@ func TestGetPostsForChannel(t *testing.T) {
 
 	found := make([]bool, 2)
 	for _, p := range posts.Posts {
-		if p.CreateAt < time {
+		if p.CreateAt < since {
 			t.Fatal("bad create at for post returned")
 		}
 		if p.Id == post4.Id {
@@ -750,6 +910,23 @@ func TestGetPost(t *testing.T) {
 	CheckBadRequestStatus(t, resp)
 
 	_, resp = Client.GetPost(model.NewId(), "")
+	CheckNotFoundStatus(t, resp)
+
+	Client.RemoveUserFromChannel(th.BasicChannel.Id, th.BasicUser.Id)
+
+	// Channel is public, should be able to read post
+	post, resp = Client.GetPost(th.BasicPost.Id, "")
+	CheckNoError(t, resp)
+
+	privatePost := th.CreatePostWithClient(Client, th.BasicPrivateChannel)
+
+	post, resp = Client.GetPost(privatePost.Id, "")
+	CheckNoError(t, resp)
+
+	Client.RemoveUserFromChannel(th.BasicPrivateChannel.Id, th.BasicUser.Id)
+
+	// Channel is private, should not be able to read post
+	post, resp = Client.GetPost(privatePost.Id, "")
 	CheckForbiddenStatus(t, resp)
 
 	Client.Logout()
@@ -803,7 +980,7 @@ func TestGetPostThread(t *testing.T) {
 	defer TearDown()
 	Client := th.Client
 
-	post := &model.Post{ChannelId: th.BasicChannel.Id, Message: "a" + model.NewId() + "a", RootId: th.BasicPost.Id}
+	post := &model.Post{ChannelId: th.BasicChannel.Id, Message: "zz" + model.NewId() + "a", RootId: th.BasicPost.Id}
 	post, _ = Client.CreatePost(post)
 
 	list, resp := Client.GetPostThread(th.BasicPost.Id, "")
@@ -829,6 +1006,23 @@ func TestGetPostThread(t *testing.T) {
 	CheckBadRequestStatus(t, resp)
 
 	_, resp = Client.GetPostThread(model.NewId(), "")
+	CheckNotFoundStatus(t, resp)
+
+	Client.RemoveUserFromChannel(th.BasicChannel.Id, th.BasicUser.Id)
+
+	// Channel is public, should be able to read post
+	_, resp = Client.GetPostThread(th.BasicPost.Id, "")
+	CheckNoError(t, resp)
+
+	privatePost := th.CreatePostWithClient(Client, th.BasicPrivateChannel)
+
+	_, resp = Client.GetPostThread(privatePost.Id, "")
+	CheckNoError(t, resp)
+
+	Client.RemoveUserFromChannel(th.BasicPrivateChannel.Id, th.BasicUser.Id)
+
+	// Channel is private, should not be able to read post
+	_, resp = Client.GetPostThread(privatePost.Id, "")
 	CheckForbiddenStatus(t, resp)
 
 	Client.Logout()
@@ -1071,7 +1265,7 @@ func TestGetFileInfosForPost(t *testing.T) {
 		}
 	}
 
-	post := &model.Post{ChannelId: th.BasicChannel.Id, Message: "a" + model.NewId() + "a", FileIds: fileIds}
+	post := &model.Post{ChannelId: th.BasicChannel.Id, Message: "zz" + model.NewId() + "a", FileIds: fileIds}
 	post, _ = Client.CreatePost(post)
 
 	infos, resp := Client.GetFileInfosForPost(post.Id, "")

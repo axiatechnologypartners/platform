@@ -2,18 +2,18 @@
 // See License.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {FormattedDate, FormattedMessage, FormattedHTMLMessage} from 'react-intl';
 
 import Banner from 'components/admin_console/banner.jsx';
 import LoadingScreen from 'components/loading_screen.jsx';
 
-import AdminStore from 'stores/admin_store.jsx';
 import AnalyticsStore from 'stores/analytics_store.jsx';
 import BrowserStore from 'stores/browser_store.jsx';
 
-import * as AsyncClient from 'utils/async_client.jsx';
+import * as AdminActions from 'actions/admin_actions.jsx';
 import {StatTypes} from 'utils/constants.jsx';
-import {convertTeamMapToList} from 'utils/team_utils.jsx';
+import {General} from 'mattermost-redux/constants';
 
 import LineChart from 'components/analytics/line_chart.jsx';
 import StatisticCount from 'components/analytics/statistic_count.jsx';
@@ -24,104 +24,107 @@ const LAST_ANALYTICS_TEAM = 'last_analytics_team';
 
 export default class TeamAnalytics extends React.Component {
     static propTypes = {
-        actions: React.PropTypes.shape({
-            getTeams: React.PropTypes.func.isRequired
+
+        /*
+         * Array of team objects
+         */
+        teams: PropTypes.arrayOf(PropTypes.object).isRequired,
+
+        /*
+         * Initial team to load analytics for
+         */
+        initialTeam: PropTypes.object,
+
+        actions: PropTypes.shape({
+
+            /*
+             * Function to get teams
+             */
+            getTeams: PropTypes.func.isRequired,
+
+            /*
+             * Function to get users in a team
+             */
+            getProfilesInTeam: PropTypes.func.isRequired
         }).isRequired
     }
 
     constructor(props) {
         super(props);
 
-        this.onChange = this.onChange.bind(this);
-        this.onAllTeamsChange = this.onAllTeamsChange.bind(this);
-        this.handleTeamChange = this.handleTeamChange.bind(this);
-
-        const teams = convertTeamMapToList(AdminStore.getAllTeams());
-        const teamId = BrowserStore.getGlobalItem(LAST_ANALYTICS_TEAM, teams.length > 0 ? teams[0].id : '');
+        const teamId = props.initialTeam ? props.initialTeam.id : '';
 
         this.state = {
-            teams,
-            teamId,
-            team: AdminStore.getTeam(teamId),
-            stats: AnalyticsStore.getAllTeam(teamId)
+            team: props.initialTeam,
+            stats: AnalyticsStore.getAllTeam(teamId),
+            recentlyActiveUsers: [],
+            newUsers: []
         };
     }
 
     componentDidMount() {
         AnalyticsStore.addChangeListener(this.onChange);
-        AdminStore.addAllTeamsChangeListener(this.onAllTeamsChange);
 
-        if (this.state.teamId !== '') {
-            this.getData(this.state.teamId);
+        if (this.state.team) {
+            this.getData(this.state.team.id);
         }
 
-        if (this.state.teams.length === 0) {
-            this.props.actions.getTeams(0, 1000);
-        }
+        this.props.actions.getTeams(0, 1000);
     }
 
     componentWillUpdate(nextProps, nextState) {
-        if (nextState.teamId !== this.state.teamId) {
-            this.getData(nextState.teamId);
+        if (nextState.team && nextState.team !== this.state.team) {
+            this.getData(nextState.team.id);
         }
     }
 
-    getData(id) {
-        AsyncClient.getStandardAnalytics(id);
-        AsyncClient.getPostsPerDayAnalytics(id);
-        AsyncClient.getUsersPerDayAnalytics(id);
-        AsyncClient.getRecentAndNewUsersAnalytics(id);
+    getData = async (id) => {
+        AdminActions.getStandardAnalytics(id);
+        AdminActions.getPostsPerDayAnalytics(id);
+        AdminActions.getUsersPerDayAnalytics(id);
+        const recentlyActiveUsers = await this.props.actions.getProfilesInTeam(id, 0, General.PROFILE_CHUNK_SIZE, 'last_activity_at');
+        const newUsers = await this.props.actions.getProfilesInTeam(id, 0, General.PROFILE_CHUNK_SIZE, 'create_at');
+
+        this.setState({
+            recentlyActiveUsers,
+            newUsers
+        });
     }
 
     componentWillUnmount() {
         AnalyticsStore.removeChangeListener(this.onChange);
-        AdminStore.removeAllTeamsChangeListener(this.onAllTeamsChange);
     }
 
-    onChange() {
+    onChange = () => {
+        const teamId = this.state.team ? this.state.team.id : '';
         this.setState({
-            stats: AnalyticsStore.getAllTeam(this.state.teamId)
+            stats: AnalyticsStore.getAllTeam(teamId)
         });
     }
 
-    onAllTeamsChange() {
-        const teams = convertTeamMapToList(AdminStore.getAllTeams());
-
-        if (teams.length > 0) {
-            if (this.state.teamId) {
-                this.setState({
-                    team: AdminStore.getTeam(this.state.teamId)
-                });
-            } else {
-                this.setState({
-                    teamId: teams[0].id,
-                    team: teams[0]
-                });
-            }
-        }
-
-        this.setState({
-            teams
-        });
-    }
-
-    handleTeamChange(e) {
+    handleTeamChange = (e) => {
         const teamId = e.target.value;
 
+        let team;
+        this.props.teams.forEach((t) => {
+            if (t.id === teamId) {
+                team = t;
+            }
+        });
+
         this.setState({
-            teamId,
-            team: AdminStore.getTeam(teamId)
+            team
         });
 
         BrowserStore.setGlobalItem(LAST_ANALYTICS_TEAM, teamId);
     }
 
     render() {
-        if (this.state.teams.length === 0 || !this.state.team || !this.state.stats) {
+        if (this.props.teams.length === 0 || !this.state.team || !this.state.stats) {
             return <LoadingScreen/>;
         }
 
-        if (this.state.teamId === '') {
+        if (this.state.team == null) {
             return (
                 <Banner
                     description={
@@ -212,10 +215,10 @@ export default class TeamAnalytics extends React.Component {
             );
         }
 
-        const recentActiveUsers = formatRecentUsersData(stats[StatTypes.RECENTLY_ACTIVE_USERS]);
-        const newlyCreatedUsers = formatNewUsersData(stats[StatTypes.NEWLY_CREATED_USERS]);
+        const recentActiveUsers = formatRecentUsersData(this.state.recentlyActiveUsers);
+        const newlyCreatedUsers = formatNewUsersData(this.state.newUsers);
 
-        const teams = this.state.teams.map((team) => {
+        const teams = this.props.teams.map((team) => {
             return (
                 <option
                     key={team.id}
@@ -244,7 +247,7 @@ export default class TeamAnalytics extends React.Component {
                         <select
                             className='form-control team-statistics__team-filter__dropdown'
                             onChange={this.handleTeamChange}
-                            value={this.state.teamId}
+                            value={this.state.team.id}
                         >
                             {teams}
                         </select>

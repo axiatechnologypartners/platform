@@ -21,6 +21,8 @@ import {FormattedMessage} from 'react-intl';
 
 import {ActionTypes, Constants, Preferences} from 'utils/constants.jsx';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 
 export default class ThemeSetting extends React.Component {
@@ -123,11 +125,6 @@ export default class ThemeSetting extends React.Component {
                 this.originalTheme = Object.assign({}, this.state.theme);
                 this.scrollToTop();
                 this.props.updateSection('');
-            },
-            (err) => {
-                var state = this.getStateFromStores();
-                state.serverError = err;
-                this.setState(state);
             }
         );
     }
@@ -353,8 +350,8 @@ export default class ThemeSetting extends React.Component {
 }
 
 ThemeSetting.propTypes = {
-    selected: React.PropTypes.bool.isRequired,
-    updateSection: React.PropTypes.func.isRequired,
-    setRequireConfirm: React.PropTypes.func.isRequired,
-    setEnforceFocus: React.PropTypes.func.isRequired
+    selected: PropTypes.bool.isRequired,
+    updateSection: PropTypes.func.isRequired,
+    setRequireConfirm: PropTypes.func.isRequired,
+    setEnforceFocus: PropTypes.func.isRequired
 };

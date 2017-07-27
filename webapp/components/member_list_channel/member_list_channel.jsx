@@ -14,6 +14,8 @@ import Constants from 'utils/constants.jsx';
 
 import * as UserAgent from 'utils/user_agent.jsx';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 
 import store from 'stores/redux_store.jsx';
@@ -23,9 +25,9 @@ const USERS_PER_PAGE = 50;
 
 export default class MemberListChannel extends React.Component {
     static propTypes = {
-        channel: React.PropTypes.object.isRequired,
-        actions: React.PropTypes.shape({
-            getChannelStats: React.PropTypes.func.isRequired
+        channel: PropTypes.object.isRequired,
+        actions: PropTypes.shape({
+            getChannelStats: PropTypes.func.isRequired
         }).isRequired
     }
 
@@ -43,7 +45,7 @@ export default class MemberListChannel extends React.Component {
         const stats = ChannelStore.getCurrentStats();
 
         this.state = {
-            users: UserStore.getProfileListInChannel(),
+            users: UserStore.getProfileListInChannel(ChannelStore.getCurrentId(), false, true),
             teamMembers: Object.assign({}, TeamStore.getMembersInTeam()),
             channelMembers: Object.assign({}, ChannelStore.getMembersInChannel()),
             total: stats.member_count,
@@ -79,7 +81,7 @@ export default class MemberListChannel extends React.Component {
         if (this.term) {
             users = searchProfilesInCurrentChannel(store.getState(), this.term);
         } else {
-            users = UserStore.getProfileListInChannel();
+            users = UserStore.getProfileListInChannel(ChannelStore.getCurrentId(), false, true);
         }
 
         this.setState({
@@ -111,7 +113,7 @@ export default class MemberListChannel extends React.Component {
 
         const searchTimeoutId = setTimeout(
             () => {
-                searchUsers(term, TeamStore.getCurrentId(), {},
+                searchUsers(term, '', {in_channel_id: ChannelStore.getCurrentId()},
                     (users) => {
                         if (searchTimeoutId !== this.searchTimeoutId) {
                             return;
@@ -144,7 +146,7 @@ export default class MemberListChannel extends React.Component {
             for (let i = 0; i < users.length; i++) {
                 const user = users[i];
 
-                if (teamMembers[user.id] && channelMembers[user.id]) {
+                if (teamMembers[user.id] && channelMembers[user.id] && user.delete_at === 0) {
                     usersToDisplay.push(user);
                     actionUserProps[user.id] = {
                         channel: this.props.channel,

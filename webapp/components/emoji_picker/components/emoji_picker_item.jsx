@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 // Copyright (c) 2016-present Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
@@ -7,12 +9,13 @@ import EmojiStore from 'stores/emoji_store.jsx';
 
 export default class EmojiPickerItem extends React.Component {
     static propTypes = {
-        emoji: React.PropTypes.object.isRequired,
-        onItemOver: React.PropTypes.func.isRequired,
-        onItemOut: React.PropTypes.func.isRequired,
-        onItemClick: React.PropTypes.func.isRequired,
-        onItemUnmount: React.PropTypes.func.isRequired,
-        category: React.PropTypes.string.isRequired
+        emoji: PropTypes.object.isRequired,
+        onItemOver: PropTypes.func.isRequired,
+        onItemOut: PropTypes.func.isRequired,
+        onItemClick: PropTypes.func.isRequired,
+        onItemUnmount: PropTypes.func.isRequired,
+        category: PropTypes.string.isRequired,
+        isLoaded: PropTypes.bool.isRequired
     }
 
     constructor(props) {
@@ -59,8 +62,8 @@ export default class EmojiPickerItem extends React.Component {
             item =
                 (<div >
                     <img
-                        src='/static/emoji/img_trans.gif'
-                        className={'  emojisprite emoji-' + this.props.emoji.filename + ' '}
+                        src='/static/images/img_trans.gif'
+                        className={'  emojisprite' + (this.props.isLoaded ? '' : '-loading') + ' emoji-' + this.props.emoji.filename + ' '}
                         onMouseOver={this.handleMouseOver}
                         onMouseOut={this.handleMouseOut}
                         onClick={this.handleClick}

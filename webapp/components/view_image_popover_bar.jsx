@@ -3,6 +3,8 @@
 
 import {FormattedMessage} from 'react-intl';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 
 export default class ViewImagePopoverBar extends React.Component {
@@ -40,7 +42,7 @@ export default class ViewImagePopoverBar extends React.Component {
                 <span className='pull-left text'>
                     <FormattedMessage
                         id='view_image_popover.file'
-                        defaultMessage='File {count} of {total}'
+                        defaultMessage='File {count, number} of {total, number}'
                         values={{
                             count: (this.props.fileId + 1),
                             total: this.props.totalFiles
@@ -75,10 +77,10 @@ ViewImagePopoverBar.defaultProps = {
 };
 
 ViewImagePopoverBar.propTypes = {
-    show: React.PropTypes.bool.isRequired,
-    fileId: React.PropTypes.number.isRequired,
-    totalFiles: React.PropTypes.number.isRequired,
-    filename: React.PropTypes.string.isRequired,
-    fileURL: React.PropTypes.string.isRequired,
-    onGetPublicLink: React.PropTypes.func.isRequired
+    show: PropTypes.bool.isRequired,
+    fileId: PropTypes.number.isRequired,
+    totalFiles: PropTypes.number.isRequired,
+    filename: PropTypes.string.isRequired,
+    fileURL: PropTypes.string.isRequired,
+    onGetPublicLink: PropTypes.func.isRequired
 };

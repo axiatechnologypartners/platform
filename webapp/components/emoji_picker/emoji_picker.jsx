@@ -2,40 +2,55 @@
 // See License.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import * as Emoji from 'utils/emoji.jsx';
 import EmojiStore from 'stores/emoji_store.jsx';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import * as Utils from 'utils/utils.jsx';
-import ReactOutsideEvent from 'react-outside-event';
 import {FormattedMessage} from 'react-intl';
 
 import EmojiPickerCategory from './components/emoji_picker_category.jsx';
 import EmojiPickerItem from './components/emoji_picker_item.jsx';
 import EmojiPickerPreview from './components/emoji_picker_preview.jsx';
 
+import PeopleSpriteSheet from 'images/emoji-sheets/people.png';
+import NatureSpriteSheet from 'images/emoji-sheets/nature.png';
+import FoodsSpriteSheet from 'images/emoji-sheets/foods.png';
+import ActivitySpriteSheet from 'images/emoji-sheets/activity.png';
+import PlacesSpriteSheet from 'images/emoji-sheets/places.png';
+import ObjectsSpriteSheet from 'images/emoji-sheets/objects.png';
+import SymbolsSpriteSheet from 'images/emoji-sheets/symbols.png';
+import FlagsSpriteSheet from 'images/emoji-sheets/flags.png';
+
 // This should include all the categories available in Emoji.CategoryNames
 const CATEGORIES = [
     'recent',
     'people',
     'nature',
-    'food',
+    'foods',
     'activity',
-    'travel',
+    'places',
     'objects',
     'symbols',
     'flags',
     'custom'
 ];
 
-class EmojiPicker extends React.Component {
+export default class EmojiPicker extends React.Component {
     static propTypes = {
-        customEmojis: React.PropTypes.object,
-        onEmojiClick: React.PropTypes.func.isRequired,
-        pickerLocation: React.PropTypes.string.isRequired,
-        emojiOffset: React.PropTypes.number,
-        outsideClick: React.PropTypes.func
+        style: PropTypes.object,
+        rightOffset: PropTypes.number,
+        topOffset: PropTypes.number,
+        placement: PropTypes.oneOf(['top', 'bottom', 'left']),
+        customEmojis: PropTypes.object,
+        onEmojiClick: PropTypes.func.isRequired
     }
+
+    static defaultProps = {
+        rightOffset: 0,
+        topOffset: 0
+    };
 
     constructor(props) {
         super(props);
@@ -43,6 +58,7 @@ class EmojiPicker extends React.Component {
         // All props are primitives or treated as immutable
         this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
 
+        this.handlePreload = this.handlePreload.bind(this);
         this.handleCategoryClick = this.handleCategoryClick.bind(this);
         this.handleFilterChange = this.handleFilterChange.bind(this);
         this.handleItemOver = this.handleItemOver.bind(this);
@@ -51,24 +67,38 @@ class EmojiPicker extends React.Component {
         this.handleScroll = this.handleScroll.bind(this);
         this.handleItemUnmount = this.handleItemUnmount.bind(this);
         this.renderCategory = this.renderCategory.bind(this);
-        this.onOutsideEvent = this.onOutsideEvent.bind(this);
 
         this.state = {
             category: 'recent',
             filter: '',
-            selected: null
+            selected: null,
+            preloaded: []
         };
     }
 
     componentDidMount() {
-        this.searchInput.focus();
+        // Delay taking focus because this briefly renders offscreen when using an Overlay
+        // so focusing it immediately on mount can cause weird scrolling
+        requestAnimationFrame(() => {
+            this.searchInput.focus();
+        });
+        beginPreloading();
+        subscribeToPreloads(this.handlePreload);
+        this.handlePreload();
     }
 
-    onOutsideEvent = (event) => {
-        // Handle the event.
-        if (this.props.outsideClick) {
-            this.props.outsideClick(event);
+    componentWillUnmount() {
+        unsubscribeFromPreloads(this.handlePreload);
+    }
+
+    handlePreload() {
+        const preloaded = [];
+        for (const category of CATEGORIES) {
+            if (didPreloadCategory(category)) {
+                preloaded.push(category);
+            }
         }
+        this.setState({preloaded});
     }
 
     handleCategoryClick(category) {
@@ -97,7 +127,7 @@ class EmojiPicker extends React.Component {
     }
 
     handleItemUnmount(emoji) {
-        //Prevent emoji preview from showing emoji which is not present anymore (due to filter)
+        // Prevent emoji preview from showing emoji which is not present anymore (due to filter)
         if (this.state.selected === emoji) {
             this.setState({selected: null});
         }
@@ -137,7 +167,8 @@ class EmojiPicker extends React.Component {
             }
         }
     }
-    renderCategory(category, filter) {
+
+    renderCategory(category, isLoaded, filter) {
         const items = [];
         let indices = [];
         let recentEmojis = [];
@@ -179,6 +210,7 @@ class EmojiPicker extends React.Component {
                     key={'system_' + (category === 'recent' ? 'recent_' : '') + (emoji.name || emoji.aliases[0])}
                     emoji={emoji}
                     category={category}
+                    isLoaded={isLoaded}
                     onItemOver={this.handleItemOver}
                     onItemOut={this.handleItemOut}
                     onItemClick={this.handleItemClick}
@@ -245,20 +277,26 @@ class EmojiPicker extends React.Component {
                 // This is a custom emoji that matches the model on the server
                 name = selected.name;
                 aliases = [selected.name];
-                previewImage = (<img
-                    className='emoji-picker__preview-image'
-                    align='absmiddle'
-                    src={EmojiStore.getEmojiImageUrl(selected)}
-                                />);
+                previewImage = (
+                    <img
+                        className='emoji-picker__preview-image'
+                        align='absmiddle'
+                        src={EmojiStore.getEmojiImageUrl(selected)}
+                    />
+                );
             } else {
                 // This is a system emoji which only has a list of aliases
                 name = selected.aliases[0];
                 aliases = selected.aliases;
-                previewImage = (<span ><img
-                    src='/static/emoji/img_trans.gif'
-                    className={'  emojisprite-preview emoji-' + selected.filename + ' '}
-                    align='absmiddle'
-                                       /></span>);
+                previewImage = (
+                    <span>
+                        <img
+                            src='/static/images/img_trans.gif'
+                            className={'  emojisprite-preview emoji-' + selected.filename + ' '}
+                            align='absmiddle'
+                        />
+                    </span>
+                );
             }
 
             return (
@@ -285,116 +323,143 @@ class EmojiPicker extends React.Component {
 
         for (const category of CATEGORIES) {
             if (category === 'custom') {
-                items.push(this.renderCategory('custom', this.state.filter, this.props.customEmojis));
+                items.push(this.renderCategory('custom', true, this.state.filter, this.props.customEmojis));
             } else {
-                items.push(this.renderCategory(category, this.state.filter));
+                items.push(this.renderCategory(category, category === 'recent' || this.state.preloaded.indexOf(category) >= 0, this.state.filter));
             }
         }
-        let cssclass = 'emoji-picker ';
-        if (this.props.pickerLocation === 'top') {
-            cssclass += 'emoji-picker-top';
-        } else if (this.props.pickerLocation === 'bottom') {
-            cssclass += 'emoji-picker-bottom';
-        } else if (this.props.pickerLocation === 'react') {
-            cssclass = 'emoji-picker-react';
-        } else if (this.props.pickerLocation === 'react-rhs-comment') {
-            cssclass = 'emoji-picker-react-rhs-comment';
+
+        let pickerStyle;
+        if (this.props.style && !(this.props.style.left === 0 || this.props.style.top === 0)) {
+            if (this.props.placement === 'top' || this.props.placement === 'bottom') {
+                // Only take the top/bottom position passed by React Bootstrap since we want to be right-aligned
+                pickerStyle = {
+                    top: this.props.style.top,
+                    bottom: this.props.style.bottom,
+                    right: this.props.rightOffset
+                };
+            } else {
+                pickerStyle = {...this.props.style};
+            }
         }
 
-        const pickerStyle = this.props.emojiOffset ? {top: this.props.emojiOffset} : {};
+        if (pickerStyle && pickerStyle.top) {
+            pickerStyle.top += this.props.topOffset;
+        }
+
         return (
             <div
+                className='emoji-picker'
                 style={pickerStyle}
-                className={cssclass}
             >
                 <div className='emoji-picker__categories'>
                     <EmojiPickerCategory
                         category='recent'
-                        icon={<i
-                            className='fa fa-clock-o'
-                            title={Utils.localizeMessage('emoji_picker.recent', 'Recently Used')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-clock-o'
+                                title={Utils.localizeMessage('emoji_picker.recent', 'Recently Used')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'recent'}
                     />
                     <EmojiPickerCategory
                         category='people'
-                        icon={<i
-                            className='fa fa-smile-o'
-                            title={Utils.localizeMessage('emoji_picker.people', 'People')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-smile-o'
+                                title={Utils.localizeMessage('emoji_picker.people', 'People')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'people'}
                     />
                     <EmojiPickerCategory
                         category='nature'
-                        icon={<i
-                            className='fa fa-leaf'
-                            title={Utils.localizeMessage('emoji_picker.nature', 'Nature')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-leaf'
+                                title={Utils.localizeMessage('emoji_picker.nature', 'Nature')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'nature'}
                     />
                     <EmojiPickerCategory
-                        category='food'
-                        icon={<i
-                            className='fa fa-cutlery'
-                            title={Utils.localizeMessage('emoji_picker.food', 'Food')}
-                              />}
+                        category='foods'
+                        icon={
+                            <i
+                                className='fa fa-cutlery'
+                                title={Utils.localizeMessage('emoji_picker.foods', 'Foods')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
-                        selected={this.state.category === 'food'}
+                        selected={this.state.category === 'foods'}
                     />
                     <EmojiPickerCategory
                         category='activity'
-                        icon={<i
-                            className='fa fa-futbol-o'
-                            title={Utils.localizeMessage('emoji_picker.activity', 'Activity')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-futbol-o'
+                                title={Utils.localizeMessage('emoji_picker.activity', 'Activity')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'activity'}
                     />
                     <EmojiPickerCategory
-                        category='travel'
-                        icon={<i
-                            className='fa fa-plane'
-                            title={Utils.localizeMessage('emoji_picker.travel', 'Travel')}
-                              />}
+                        category='places'
+                        icon={
+                            <i
+                                className='fa fa-plane'
+                                title={Utils.localizeMessage('emoji_picker.places', 'Places')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
-                        selected={this.state.category === 'travel'}
+                        selected={this.state.category === 'places'}
                     />
                     <EmojiPickerCategory
                         category='objects'
-                        icon={<i
-                            className='fa fa-lightbulb-o'
-                            title={Utils.localizeMessage('emoji_picker.objects', 'Objects')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-lightbulb-o'
+                                title={Utils.localizeMessage('emoji_picker.objects', 'Objects')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'objects'}
                     />
                     <EmojiPickerCategory
                         category='symbols'
-                        icon={<i
-                            className='fa fa-heart-o'
-                            title={Utils.localizeMessage('emoji_picker.symbols', 'Symbols')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-heart-o'
+                                title={Utils.localizeMessage('emoji_picker.symbols', 'Symbols')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'symbols'}
                     />
                     <EmojiPickerCategory
                         category='flags'
-                        icon={<i
-                            className='fa fa-flag-o'
-                            title={Utils.localizeMessage('emoji_picker.flags', 'Flags')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-flag-o'
+                                title={Utils.localizeMessage('emoji_picker.flags', 'Flags')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'flags'}
                     />
                     <EmojiPickerCategory
                         category='custom'
-                        icon={<i
-                            className='fa fa-at'
-                            title={Utils.localizeMessage('emoji_picker.custom', 'Custom')}
-                              />}
+                        icon={
+                            <i
+                                className='fa fa-at'
+                                title={Utils.localizeMessage('emoji_picker.custom', 'Custom')}
+                            />
+                        }
                         onCategoryClick={this.handleCategoryClick}
                         selected={this.state.category === 'custom'}
                     />
@@ -425,6 +490,86 @@ class EmojiPicker extends React.Component {
     }
 }
 
-// disabling eslint check for outslide click handler
-// eslint-disable-next-line new-cap
-export default ReactOutsideEvent(EmojiPicker, ['click']);
+var preloads = {
+    people: {
+        src: PeopleSpriteSheet,
+        didPreload: false
+    },
+    nature: {
+        src: NatureSpriteSheet,
+        didPreload: false
+    },
+    foods: {
+        src: FoodsSpriteSheet,
+        didPreload: false
+    },
+    activity: {
+        src: ActivitySpriteSheet,
+        didPreload: false
+    },
+    places: {
+        src: PlacesSpriteSheet,
+        didPreload: false
+    },
+    objects: {
+        src: ObjectsSpriteSheet,
+        didPreload: false
+    },
+    symbols: {
+        src: SymbolsSpriteSheet,
+        didPreload: false
+    },
+    flags: {
+        src: FlagsSpriteSheet,
+        didPreload: false
+    }
+};
+
+var didBeginPreloading = false;
+
+var preloadCallback = null;
+
+export function beginPreloading() {
+    if (didBeginPreloading) {
+        return;
+    }
+    didBeginPreloading = true;
+    preloadNextCategory();
+}
+
+function preloadNextCategory() {
+    let sheet = null;
+    for (const category of CATEGORIES) {
+        const preload = preloads[category];
+        if (preload && !preload.didPreload) {
+            sheet = preload;
+            break;
+        }
+    }
+    if (sheet) {
+        const img = new Image();
+        img.onload = () => {
+            sheet.didPreload = true;
+            if (preloadCallback) {
+                preloadCallback();
+            }
+            preloadNextCategory();
+        };
+        img.src = sheet.src;
+    }
+}
+
+export function didPreloadCategory(category) {
+    const preload = preloads[category];
+    return preload && preload.didPreload;
+}
+
+function subscribeToPreloads(callback) {
+    preloadCallback = callback;
+}
+
+function unsubscribeFromPreloads(callback) {
+    if (callback === preloadCallback) {
+        preloadCallback = null;
+    }
+}

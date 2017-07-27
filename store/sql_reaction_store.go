@@ -4,12 +4,12 @@
 package store
 
 import (
+	"github.com/mattermost/gorp"
 	"github.com/mattermost/platform/einterfaces"
 	"github.com/mattermost/platform/model"
 	"github.com/mattermost/platform/utils"
 
 	l4g "github.com/alecthomas/log4go"
-	"github.com/go-gorp/gorp"
 )
 
 const (
@@ -20,10 +20,10 @@ const (
 var reactionCache *utils.Cache = utils.NewLru(REACTION_CACHE_SIZE)
 
 type SqlReactionStore struct {
-	*SqlStore
+	SqlStore
 }
 
-func NewSqlReactionStore(sqlStore *SqlStore) ReactionStore {
+func NewSqlReactionStore(sqlStore SqlStore) ReactionStore {
 	s := &SqlReactionStore{sqlStore}
 
 	for _, db := range sqlStore.GetAllConns() {

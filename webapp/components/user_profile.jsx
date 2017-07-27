@@ -3,9 +3,10 @@
 
 import ProfilePopover from './profile_popover.jsx';
 import * as Utils from 'utils/utils.jsx';
-import Client from 'client/web_client.jsx';
 
 import {OverlayTrigger} from 'react-bootstrap';
+
+import PropTypes from 'prop-types';
 
 import React from 'react';
 
@@ -54,9 +55,10 @@ export default class UserProfile extends React.Component {
     render() {
         let name = '...';
         let profileImg = '';
+
         if (this.props.user) {
             name = Utils.displayUsername(this.props.user.id);
-            profileImg = Client.getUsersRoute() + '/' + this.props.user.id + '/image?time=' + this.props.user.last_picture_update;
+            profileImg = Utils.imageURLForUser(this.props.user);
         }
 
         if (this.props.overwriteName) {
@@ -85,7 +87,6 @@ export default class UserProfile extends React.Component {
             >
                 <div
                     className='user-popover'
-                    id={'profile_' + this.uniqueId}
                 >
                     {name}
                 </div>
@@ -101,11 +102,11 @@ UserProfile.defaultProps = {
     disablePopover: false
 };
 UserProfile.propTypes = {
-    user: React.PropTypes.object,
-    overwriteName: React.PropTypes.node,
-    overwriteImage: React.PropTypes.string,
-    disablePopover: React.PropTypes.bool,
-    displayNameType: React.PropTypes.string,
-    status: React.PropTypes.string,
-    isBusy: React.PropTypes.bool
+    user: PropTypes.object,
+    overwriteName: PropTypes.node,
+    overwriteImage: PropTypes.string,
+    disablePopover: PropTypes.bool,
+    displayNameType: PropTypes.string,
+    status: PropTypes.string,
+    isBusy: PropTypes.bool
 };

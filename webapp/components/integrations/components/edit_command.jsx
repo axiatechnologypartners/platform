@@ -2,13 +2,13 @@
 // See License.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import * as AsyncClient from 'utils/async_client.jsx';
 import IntegrationStore from 'stores/integration_store.jsx';
 import TeamStore from 'stores/team_store.jsx';
 import * as Utils from 'utils/utils.jsx';
 
-import {loadTeamCommands} from 'actions/integration_actions.jsx';
+import {loadTeamCommands, editCommand} from 'actions/integration_actions.jsx';
 import BackstageHeader from 'components/backstage/components/backstage_header.jsx';
 import {FormattedMessage} from 'react-intl';
 import FormError from 'components/form_error.jsx';
@@ -23,8 +23,8 @@ const REQUEST_GET = 'G';
 export default class EditCommand extends React.Component {
     static get propTypes() {
         return {
-            team: React.PropTypes.object,
-            location: React.PropTypes.object
+            team: PropTypes.object,
+            location: PropTypes.object
         };
     }
 
@@ -96,7 +96,7 @@ export default class EditCommand extends React.Component {
     }
 
     submitCommand() {
-        AsyncClient.editCommand(
+        editCommand(
             this.newCmd,
             browserHistory.push('/' + this.props.team.name + '/integrations/commands'),
             (err) => {
@@ -170,7 +170,8 @@ export default class EditCommand extends React.Component {
             method: this.state.method,
             username: this.state.username,
             icon_url: this.state.iconUrl,
-            auto_complete: this.state.autocomplete
+            auto_complete: this.state.autocomplete,
+            team_id: this.props.team.id
         };
 
         if (this.originalCommand.id) {
@@ -717,7 +718,7 @@ export default class EditCommand extends React.Component {
                             <ConfirmModal
                                 title={confirmTitle}
                                 message={confirmMessage}
-                                confirmButton={confirmButton}
+                                confirmButtonText={confirmButton}
                                 show={this.state.showConfirmModal}
                                 onConfirm={this.handleUpdate}
                                 onCancel={this.confirmModalDismissed}

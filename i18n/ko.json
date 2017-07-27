@@ -49,19 +49,19 @@
   },
   {
     "id": "api.admin.add_certificate.no_file.app_error",
-    "translation": "요청의 'certificate' 항목에 파일이 없습니다."
+    "translation": "요청된 '인증서' 항목의 파일이 없습니다."
   },
   {
     "id": "api.admin.add_certificate.open.app_error",
-    "translation": "인증서를 열 수 없습니다."
+    "translation": "인증서 파일을 열 수 없습니다."
   },
   {
     "id": "api.admin.add_certificate.saving.app_error",
-    "translation": "인증서를 저장할 수 없습니다"
+    "translation": "인증서 파일을 저장할 수 없습니다."
   },
   {
     "id": "api.admin.file_read_error",
-    "translation": "로그 파일을 읽는데 오류가 발생했습니다"
+    "translation": "로그 파일을 읽는데 오류가 발생했습니다."
   },
   {
     "id": "api.admin.get_brand_image.not_available.app_error",
@@ -77,7 +77,7 @@
   },
   {
     "id": "api.admin.recycle_db_end.warn",
-    "translation": "DB 연결 재사용 완료"
+    "translation": "DB 연결 재사용을 완료했습니다."
   },
   {
     "id": "api.admin.recycle_db_start.warn",
@@ -89,7 +89,7 @@
   },
   {
     "id": "api.admin.saml.metadata.app_error",
-    "translation": "서비스 제공자 메타데이터를 빌드하는 중 오류가 발생했습니다."
+    "translation": "서비스 제공 메타 데이터를 만드는 중 오류가 발생하였습니다."
   },
   {
     "id": "api.admin.test_email.body",
@@ -185,11 +185,11 @@
   },
   {
     "id": "api.channel.can_manage_channel.private_restricted_system_admin.app_error",
-    "translation": "공개 채널 생성, 관리는 시스템 관리자 권한이 필요합니다."
+    "translation": "공개 채널의 생성 및 관리는 시스템 관리자 권한이 필요합니다."
   },
   {
     "id": "api.channel.can_manage_channel.private_restricted_team_admin.app_error",
-    "translation": "공개 채널 생성, 관리는 팀 관리자 또는 시스템 관리자 권한이 필요합니다."
+    "translation": "비공개 채널 생성 및 관리 권한은 팀 관리자 및 시스템 관리자에게만 주어집니다."
   },
   {
     "id": "api.channel.can_manage_channel.public_restricted_system_admin.app_error",
@@ -225,11 +225,11 @@
   },
   {
     "id": "api.channel.create_group.bad_size.app_error",
-    "translation": "Group message channels must contain at least 3 and no more than 8 users"
+    "translation": "그룹 메세지 채널은 최소 3명에서 최대 8명까지의 사용자를 포함해야 합니다."
   },
   {
     "id": "api.channel.create_group.bad_user.app_error",
-    "translation": "One of the provided users does not exist"
+    "translation": "제공된 사용자 중 존재하지 않는 사용자가 있습니다."
   },
   {
     "id": "api.channel.delete_channel.archived",
@@ -289,7 +289,7 @@
   },
   {
     "id": "api.channel.join_channel.already_deleted.app_error",
-    "translation": "Channel is already deleted"
+    "translation": "채널이 이미 삭제되었습니다"
   },
   {
     "id": "api.channel.join_channel.permissions.app_error",
@@ -393,7 +393,7 @@
   },
   {
     "id": "api.cluster.init.debug",
-    "translation": "사용자 API 경로 초기화 중"
+    "translation": "클러스터 API 경로 초기화 중"
   },
   {
     "id": "api.command.admin_only.app_error",
@@ -429,7 +429,7 @@
   },
   {
     "id": "api.command.execute_command.not_found.app_error",
-    "translation": "트리거 '{{.Trigger}}'에 의한 명령어를 찾을 수 없습니다"
+    "translation": "Command with a trigger of '{{.Trigger}}' not found. To send a message beginning with \"/\", try adding an empty space at the beginning of the message."
   },
   {
     "id": "api.command.execute_command.save.app_error",
@@ -458,6 +458,10 @@
   {
     "id": "api.command.invite_people.hint",
     "translation": "[name@domain.com ...]"
+  },
+  {
+    "id": "api.command.invite_people.invite_off",
+    "translation": "이 서버의 사용자 생성는 중지되어 있습니다. 초대가 보내지지 않습니다"
   },
   {
     "id": "api.command.invite_people.name",
@@ -494,6 +498,38 @@
   {
     "id": "api.command_away.success",
     "translation": "이제 자리비움 상태입니다."
+  },
+  {
+    "id": "api.command_channel_header.channel.app_error",
+    "translation": "현재 채널을 찾는 중 오류가 발생하였습니다."
+  },
+  {
+    "id": "api.command_channel_header.desc",
+    "translation": "채널 머릿말 수정"
+  },
+  {
+    "id": "api.command_channel_header.hint",
+    "translation": "[text]"
+  },
+  {
+    "id": "api.command_channel_header.message.app_error",
+    "translation": "문장은 /header 명령과 함께 입력되어야 합니다."
+  },
+  {
+    "id": "api.command_channel_header.name",
+    "translation": "header"
+  },
+  {
+    "id": "api.command_channel_header.permission.app_error",
+    "translation": "당신은 채널 머릿말을 수정할 권한을 가지고 있지 않습니다."
+  },
+  {
+    "id": "api.command_channel_header.update_channel.app_error",
+    "translation": "현재 채널의 업데이트에 실패하였습니다."
+  },
+  {
+    "id": "api.command_channel_header.update_channel.success",
+    "translation": "채널 머릿말이 성공적으로 업데이트되었습니다."
   },
   {
     "id": "api.command_collapse.desc",
@@ -550,6 +586,14 @@
   {
     "id": "api.command_expand_collapse.fail.app_error",
     "translation": "미리보기를 펼치는 중 오류가 발생하였습니다."
+  },
+  {
+    "id": "api.command_help.desc",
+    "translation": "Mattermost 도움말 페이지 열기"
+  },
+  {
+    "id": "api.command_help.name",
+    "translation": "help"
   },
   {
     "id": "api.command_join.desc",
@@ -660,6 +704,38 @@
     "translation": "이제 온라인 상태입니다."
   },
   {
+    "id": "api.command_open.name",
+    "translation": "열기"
+  },
+  {
+    "id": "api.command_search.desc",
+    "translation": "메세지에서 문장 찾기"
+  },
+  {
+    "id": "api.command_search.hint",
+    "translation": "[text]"
+  },
+  {
+    "id": "api.command_search.name",
+    "translation": "search"
+  },
+  {
+    "id": "api.command_search.unsupported.app_error",
+    "translation": "당신의 기기에서는 검색 명령을 지원하지 않습니다"
+  },
+  {
+    "id": "api.command_settings.desc",
+    "translation": "계정 설정 화면 열기"
+  },
+  {
+    "id": "api.command_settings.name",
+    "translation": "설정"
+  },
+  {
+    "id": "api.command_settings.unsupported.app_error",
+    "translation": "당신의 기기에서는 설정 명령을 지원하지 않습니다"
+  },
+  {
     "id": "api.command_shortcuts.browser.channel_next",
     "translation": "{{.ChannelNextCmd}}: 기록 상의 다음 채널\n"
   },
@@ -756,6 +832,10 @@
     "translation": "ESC: 현재 채널의 모든 메시지를 읽음으로 표시\n"
   },
   {
+    "id": "api.command_shortcuts.msgs.reply",
+    "translation": "SHIFT+UP (빈 입력창에서):현재 채널의 가장 마지막 메세지에 대답\n"
+  },
+  {
     "id": "api.command_shortcuts.msgs.reprint_next",
     "translation": "{{.CmdOrCtrl}}+아래 방향키 (빈 입력란에서): 입력한 다음 차례의 메시지 혹은 슬래시 명령어 재입력\n"
   },
@@ -766,6 +846,10 @@
   {
     "id": "api.command_shortcuts.name",
     "translation": "단축키"
+  },
+  {
+    "id": "api.command_shortcuts.nav.direct_messages_menu",
+    "translation": "{{.CmdOrCtrl}}+SHIFT+K: Direct 메세지 메뉴 열기\n"
   },
   {
     "id": "api.command_shortcuts.nav.header",
@@ -789,6 +873,10 @@
   },
   {
     "id": "api.command_shortcuts.nav.switcher",
+    "translation": "{{.CmdOrCtrl}}+K: 빠른 채널 스위처 창 열기\n"
+  },
+  {
+    "id": "api.command_shortcuts.nav.switcher_team",
     "translation": "{{.CmdOrCtrl}}+K: 빠른 채널 스위처 창 열기\n"
   },
   {
@@ -817,7 +905,7 @@
   },
   {
     "id": "api.config.client.old_format.app_error",
-    "translation": "New format for the client configuration is not supported yet. Please specify format=old in the query string."
+    "translation": "사용자 설정을 위한 새로운 형식은 아직 지원되지 않습니다. 명령문에서 format=old 를 명시해 주세요."
   },
   {
     "id": "api.context.404.app_error",
@@ -888,6 +976,10 @@
     "translation": "알 수 없는 오류가 발생했습니다. 지원 서비스에 연락하시기 바랍니다."
   },
   {
+    "id": "api.context.v3_disabled.app_error",
+    "translation": "API 버전 3은 이 서버에서 비활성화 되어 있습니다. API 버전 4를 이용하십시오. 자세한 내용은 다음을 참고하세요 : https://api.mattermost.com "
+  },
+  {
     "id": "api.deprecated.init.debug",
     "translation": "명령어 API 경로 초기화 중"
   },
@@ -925,7 +1017,7 @@
   },
   {
     "id": "api.email_batching.render_batched_post.group_message",
-    "translation": "Group Message"
+    "translation": "그룹 메세지"
   },
   {
     "id": "api.email_batching.render_batched_post.sender.app_error",
@@ -1023,15 +1115,15 @@
   },
   {
     "id": "api.emoji.upload.large_image.gif_decode_error",
-    "translation": "이모티콘을 생성할 수 없습니다. 이미지 디코딩 시도 중 오류가 발생했습니다."
+    "translation": "이모지를 만들 수 없습니다. GIF 디코딩 중 오류가 발생했습니다."
   },
   {
     "id": "api.emoji.upload.large_image.gif_encode_error",
-    "translation": "이모티콘을 생성할 수 없습니다. 이미지 인코딩 시도 중 오류가 발생했습니다."
+    "translation": "이모지를 만들 수 없습니다. GIF 인코딩 중 오류가 발생했습니다."
   },
   {
     "id": "api.file.attachments.disabled.app_error",
-    "translation": "File attachments have been disabled on this server."
+    "translation": "이 서버는 파일 첨부가 비활성화 되어 있습니다."
   },
   {
     "id": "api.file.get_file.public_disabled.app_error",
@@ -1199,7 +1291,7 @@
   },
   {
     "id": "api.file.upload_file.bad_parse.app_error",
-    "translation": "Unable to upload file. Header cannot be parsed."
+    "translation": "파일을 업로드 할 수 없습니다. 머릿말 파싱에 실패하였습니다."
   },
   {
     "id": "api.file.upload_file.large_image.app_error",
@@ -1303,7 +1395,7 @@
   },
   {
     "id": "api.license.client.old_format.app_error",
-    "translation": "New format for the client license is not supported yet. Please specify format=old in the query string."
+    "translation": "사용자 설정을 위한 새로운 형식은 아직 지원되지 않습니다. 명령문에서 format=old 를 명시해 주세요."
   },
   {
     "id": "api.license.init.debug",
@@ -1418,6 +1510,10 @@
     "translation": "oauth API 경로 초기화 중"
   },
   {
+    "id": "api.oauth.invalid_state_token.app_error",
+    "translation": "Invalid state token"
+  },
+  {
     "id": "api.oauth.regenerate_secret.app_error",
     "translation": "OAuth2 앱의 Secret를 재생성하기에 부적절한 권합니다."
   },
@@ -1448,6 +1544,10 @@
   {
     "id": "api.oauth.singup_with_oauth.invalid_link.app_error",
     "translation": "유효하지 않은 가입 링크입니다."
+  },
+  {
+    "id": "api.opengraph.init.debug",
+    "translation": "Initializing open graph protocol api routes"
   },
   {
     "id": "api.post.check_for_out_of_channel_mentions.message.multiple",
@@ -1561,7 +1661,7 @@
   },
   {
     "id": "api.post.make_direct_channel_visible.get_2_members.error",
-    "translation": "다이렉트 채널의 두명의 구성원을 가져올 수 없습니다. channel_id=%v"
+    "translation": "다이렉트 채널에 2명의 구성원을 가져올 수 없습니다. channel_id={{.ChannelId}}"
   },
   {
     "id": "api.post.make_direct_channel_visible.get_members.error",
@@ -1612,6 +1712,14 @@
     "translation": "신규 메시지"
   },
   {
+    "id": "api.post.send_notifications_and_forget.push_image_only",
+    "translation": " Uploaded one or more files in "
+  },
+  {
+    "id": "api.post.send_notifications_and_forget.push_image_only_dm",
+    "translation": " Uploaded one or more files in a direct message"
+  },
+  {
     "id": "api.post.send_notifications_and_forget.push_in",
     "translation": " in "
   },
@@ -1626,10 +1734,6 @@
   {
     "id": "api.post.send_notifications_and_forget.push_non_mention",
     "translation": " posted in "
-  },
-  {
-    "id": "api.post.send_notifications_and_forget.push_notification.debug",
-    "translation": "%v에게 다음 내용으로 푸시 알림 발송 '%v'"
   },
   {
     "id": "api.post.send_notifications_and_forget.push_notification.error",
@@ -1968,12 +2072,8 @@
     "translation": "User not found"
   },
   {
-    "id": "api.team.add_user_to_team.invalid_data.app_error",
-    "translation": "Invalid data."
-  },
-  {
-    "id": "api.team.add_user_to_team.invalid_invite_id.app_error",
-    "translation": "Invalid invite id. No team matches with this invite id."
+    "id": "api.system.go_routines",
+    "translation": "The number of running goroutines is over the health threshold %v of %v"
   },
   {
     "id": "api.team.add_user_to_team.missing_parameter.app_error",
@@ -2048,6 +2148,10 @@
     "translation": "이미 팀에 가입되어 있는 사용자입니다."
   },
   {
+    "id": "api.team.invite_members.invalid_email.app_error",
+    "translation": "The following email addresses do not belong to an accepted domain: {{.Addresses}}. Please contact your System Administrator for details."
+  },
+  {
     "id": "api.team.invite_members.member",
     "translation": "멤버"
   },
@@ -2105,7 +2209,7 @@
   },
   {
     "id": "api.templates.channel_name.group",
-    "translation": "Group Message"
+    "translation": "그룹 메세지"
   },
   {
     "id": "api.templates.email_change_body.info",
@@ -2273,7 +2377,7 @@
   },
   {
     "id": "api.templates.signin_change_email.subject",
-    "translation": "[{{ .SiteName }}] You updated your sign-in method on {{ .SiteName }}"
+    "translation": "[{{ .SiteName }}] Your sign-in method has been updated"
   },
   {
     "id": "api.templates.signup_team_body.button",
@@ -2462,6 +2566,14 @@
   {
     "id": "api.user.create_user.joining.error",
     "translation": "기본 채널에 참여하는데 실패했습니다. user_id=%s, team_id=%s, err=%v"
+  },
+  {
+    "id": "api.user.create_user.missing_hash_or_data.app_error",
+    "translation": "Missing Hash or URL query data."
+  },
+  {
+    "id": "api.user.create_user.missing_invite_id.app_error",
+    "translation": "Missing Invite Id."
   },
   {
     "id": "api.user.create_user.no_open_server",
@@ -2725,7 +2837,7 @@
   },
   {
     "id": "api.user.upload_profile_user.decode_config.app_error",
-    "translation": "프로필 이미지 구성을 불러올 수 없습니다."
+    "translation": "Could not save profile image. File does not appear to be a valid image."
   },
   {
     "id": "api.user.upload_profile_user.encode.app_error",
@@ -2932,8 +3044,48 @@
     "translation": "Error importing channel. Team with name \"{{.TeamName}}\" could not be found."
   },
   {
+    "id": "app.import.import_direct_channel.create_direct_channel.error",
+    "translation": "Failed to create direct channel"
+  },
+  {
+    "id": "app.import.import_direct_channel.create_group_channel.error",
+    "translation": "Failed to create group channel"
+  },
+  {
+    "id": "app.import.import_direct_channel.member_not_found.error",
+    "translation": "Could not find channel member when importing direct channel"
+  },
+  {
+    "id": "app.import.import_direct_channel.update_header_failed.error",
+    "translation": "Failed to update direct channel header"
+  },
+  {
+    "id": "app.import.import_direct_post.channel_member_not_found.error",
+    "translation": "Could not find channel member when importing direct channel post"
+  },
+  {
+    "id": "app.import.import_direct_post.create_direct_channel.error",
+    "translation": "Failed to get direct channel"
+  },
+  {
+    "id": "app.import.import_direct_post.create_group_channel.error",
+    "translation": "Failed to get group channel"
+  },
+  {
+    "id": "app.import.import_direct_post.user_not_found.error",
+    "translation": "Post user does not exist"
+  },
+  {
     "id": "app.import.import_line.null_channel.error",
     "translation": "Import data line has type \"channel\" but the channel object is null."
+  },
+  {
+    "id": "app.import.import_line.null_direct_channel.error",
+    "translation": "Import data line has type \"direct_channel\" but the direct_channel object is null."
+  },
+  {
+    "id": "app.import.import_line.null_direct_post.error",
+    "translation": "Import data line has type \"direct_post\" but the direct_post object is null."
   },
   {
     "id": "app.import.import_line.null_post.error",
@@ -2965,7 +3117,7 @@
   },
   {
     "id": "app.import.validate_channel_import_data.create_at_zero.error",
-    "translation": "Channel create_at must not be 0 if provided."
+    "translation": "Channel create_at must not be zero if provided."
   },
   {
     "id": "app.import.validate_channel_import_data.display_name_length.error",
@@ -2973,7 +3125,7 @@
   },
   {
     "id": "app.import.validate_channel_import_data.display_name_missing.error",
-    "translation": "Missing required channel property: display_name."
+    "translation": "Missing required channel property: display_name"
   },
   {
     "id": "app.import.validate_channel_import_data.header_length.error",
@@ -3008,6 +3160,54 @@
     "translation": "Missing required channel property: type."
   },
   {
+    "id": "app.import.validate_direct_channel_import_data.header_length.error",
+    "translation": "Direct channel header is too long"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_required.error",
+    "translation": "Missing required direct channel property: members"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_too_few.error",
+    "translation": "Direct channel members list contains too few items"
+  },
+  {
+    "id": "app.import.validate_direct_channel_import_data.members_too_many.error",
+    "translation": "Direct channel members list contains too many items"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_required.error",
+    "translation": "Missing required direct post property: channel_members"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_too_few.error",
+    "translation": "Direct post channel members list contains too few items"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.channel_members_too_many.error",
+    "translation": "Direct post channel members list contains too many items"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.create_at_missing.error",
+    "translation": "Missing required direct post property: create_at"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.create_at_zero.error",
+    "translation": "CreateAt must be greater than 0"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.message_length.error",
+    "translation": "Message is too long"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.message_missing.error",
+    "translation": "Missing required direct post property: message"
+  },
+  {
+    "id": "app.import.validate_direct_post_import_data.user_missing.error",
+    "translation": "Missing required direct post property: user"
+  },
+  {
     "id": "app.import.validate_post_import_data.channel_missing.error",
     "translation": "Missing required Post property: Channel."
   },
@@ -3017,7 +3217,7 @@
   },
   {
     "id": "app.import.validate_post_import_data.create_at_zero.error",
-    "translation": "Post CreateAt must not be zero if it is provided."
+    "translation": "Post CreateAt property must not be zero if provided."
   },
   {
     "id": "app.import.validate_post_import_data.message_length.error",
@@ -3041,7 +3241,7 @@
   },
   {
     "id": "app.import.validate_team_import_data.create_at_zero.error",
-    "translation": "Team create_at must not be 0 if provided."
+    "translation": "Team create_at must not be zero if provided."
   },
   {
     "id": "app.import.validate_team_import_data.description_length.error",
@@ -3053,7 +3253,7 @@
   },
   {
     "id": "app.import.validate_team_import_data.display_name_missing.error",
-    "translation": "Missing required team property: display_name"
+    "translation": "Missing required team property: display_name."
   },
   {
     "id": "app.import.validate_team_import_data.name_characters.error",
@@ -3069,7 +3269,7 @@
   },
   {
     "id": "app.import.validate_team_import_data.name_reserved.error",
-    "translation": "Team name contains reserved word."
+    "translation": "Team name contains reserved words."
   },
   {
     "id": "app.import.validate_team_import_data.type_invalid.error",
@@ -3077,7 +3277,7 @@
   },
   {
     "id": "app.import.validate_team_import_data.type_missing.error",
-    "translation": "Missing required team property: type"
+    "translation": "Missing required team property: type."
   },
   {
     "id": "app.import.validate_user_channels_import_data.channel_name_missing.error",
@@ -3233,7 +3433,7 @@
   },
   {
     "id": "ent.cluster.config_changed.info",
-    "translation": "Cluster configuration has changed for id=%v.  Attempting to restart cluster service.  To ensure the cluster is configured correctly you should not rely on this restart because we detected a core configuration change."
+    "translation": "Cluster configuration has changed for id={{ .id }}.  The cluster may become unstable and a restart is required.  To ensure the cluster is configured correctly you should perform a rolling restart immediately."
   },
   {
     "id": "ent.cluster.debug_fail.debug",
@@ -3265,7 +3465,7 @@
   },
   {
     "id": "ent.cluster.save_config.error",
-    "translation": "System Console is set to read-only when High Availability is enabled."
+    "translation": "System Console is set to read-only when High Availability is enabled  unless ReadOnlyConfig is disabled in the configuration file."
   },
   {
     "id": "ent.cluster.starting.info",
@@ -3294,6 +3494,46 @@
   {
     "id": "ent.compliance.run_started.info",
     "translation": "Compliance export started for job '{{.JobName}}' at '{{.FilePath}}'"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.disabled",
+    "translation": "ElasticSearch searching is disabled on this server"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.search_failed",
+    "translation": "Search failed to complete"
+  },
+  {
+    "id": "ent.elasticsearch.search_posts.unmarshall_post_failed",
+    "translation": "Failed to decode search results"
+  },
+  {
+    "id": "ent.elasticsearch.start.connect_failed",
+    "translation": "Setting up ElasticSearch Client Failed"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_create_failed",
+    "translation": "Failed to create ElasticSearch index"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_exists_failed",
+    "translation": "Failed to establish whether ElasticSearch index exists"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_mapping_failed",
+    "translation": "Failed to setup ElasticSearch index mapping"
+  },
+  {
+    "id": "ent.elasticsearch.start.index_settings_failed",
+    "translation": "Failed to set ElasticSearch index settings"
+  },
+  {
+    "id": "ent.elasticsearch.test_config.indexing_disabled.error",
+    "translation": "Elasticsearch is disabled."
+  },
+  {
+    "id": "ent.elasticsearch.test_config.license.error",
+    "translation": "License does not support Elasticsearch."
   },
   {
     "id": "ent.emoji.licence_disable.app_error",
@@ -3852,6 +4092,22 @@
     "translation": "Unable to enable email batching when clustering is enabled"
   },
   {
+    "id": "model.config.is_valid.elastic_search.connection_url.app_error",
+    "translation": "Elastic Search ConnectionUrl setting must be provided when Elastic Search indexing is enabled."
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.enable_searching.app_error",
+    "translation": "Elastic Search IndexingEnabled setting must be set to true when Elastic Search SearchEnabled is set to true."
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.password.app_error",
+    "translation": "Elastic Search Password setting must be provided when Elastic Search indexing is enabled."
+  },
+  {
+    "id": "model.config.is_valid.elastic_search.username.app_error",
+    "translation": "Elastic Search Username setting must be provided when Elastic Search indexing is enabled."
+  },
+  {
     "id": "model.config.is_valid.email_batching_buffer_size.app_error",
     "translation": "Invalid email batching buffer size for email settings.  Must be zero or a positive number."
   },
@@ -4074,6 +4330,14 @@
   {
     "id": "model.config.is_valid.sql_max_conn.app_error",
     "translation": "Invalid maximum open connection for SQL settings.  Must be a positive number."
+  },
+  {
+    "id": "model.config.is_valid.sql_query_timeout.app_error",
+    "translation": "파일 세팅에 대해 잘못된 프로파일 높이 값입니다. 0보다 큰 값이여야 합니다."
+  },
+  {
+    "id": "model.config.is_valid.teammate_name_display.app_error",
+    "translation": "Invalid teammate display.  Must be 'full_name', 'nickname_full_name' or 'username'"
   },
   {
     "id": "model.config.is_valid.time_between_user_typing.app_error",
@@ -4632,14 +4896,6 @@
     "translation": "Failed to open sql connection %v"
   },
   {
-    "id": "store.sql.ping.critical",
-    "translation": "Failed to ping db err:%v"
-  },
-  {
-    "id": "store.sql.pinging.info",
-    "translation": "Pinging sql %v database"
-  },
-  {
     "id": "store.sql.read_replicas_not_licensed.critical",
     "translation": "현재 라이센스로는 1개 이상의 읽기 복제가 기능적으로 비활성화 되어있습니다. 엔터프라이즈 라이센스의 업그레이드에 대해 시스템 관리자에게 문의하십시오."
   },
@@ -5036,6 +5292,30 @@
     "translation": "We couldn't save the file info"
   },
   {
+    "id": "store.sql_file_info.save_or_update.app_error",
+    "translation": "We couldn't save or update the file info"
+  },
+  {
+    "id": "store.sql_job_status.delete_by_type.app_error",
+    "translation": "채널을 찾을 수 없습니다"
+  },
+  {
+    "id": "store.sql_job_status.get.app_error",
+    "translation": "채널을 찾을 수 없습니다"
+  },
+  {
+    "id": "store.sql_job_status.get_all.app_error",
+    "translation": "채널을 찾을 수 없습니다"
+  },
+  {
+    "id": "store.sql_job_status.save.app_error",
+    "translation": "채널을 찾을 수 없습니다"
+  },
+  {
+    "id": "store.sql_job_status.update.app_error",
+    "translation": "채널을 찾을 수 없습니다"
+  },
+  {
     "id": "store.sql_license.get.app_error",
     "translation": "We encountered an error getting the license"
   },
@@ -5182,6 +5462,10 @@
   {
     "id": "store.sql_post.get_posts_around.get_parent.app_error",
     "translation": "We couldn't get the parent posts for the channel"
+  },
+  {
+    "id": "store.sql_post.get_posts_by_ids.app_error",
+    "translation": "채널을 찾을 수 없습니다"
   },
   {
     "id": "store.sql_post.get_posts_created_att.app_error",
@@ -5608,12 +5892,16 @@
     "translation": "We found multiple users matching your credentials and were unable to log you in. Please contact an administrator."
   },
   {
+    "id": "store.sql_user.get_new_users.app_error",
+    "translation": "We encountered an error while finding preferences"
+  },
+  {
     "id": "store.sql_user.get_profiles.app_error",
     "translation": "We encountered an error while finding user profiles"
   },
   {
     "id": "store.sql_user.get_recently_active_users.app_error",
-    "translation": "We encountered an error while finding the recently active users"
+    "translation": "We encountered an error while finding preferences"
   },
   {
     "id": "store.sql_user.get_sysadmin_profiles.app_error",
@@ -5896,6 +6184,10 @@
     "translation": "Encountered error signing license, err=%v"
   },
   {
+    "id": "utils.mail.connect_smtp.helo.app_error",
+    "translation": "Failed to set HELO"
+  },
+  {
     "id": "utils.mail.connect_smtp.open.app_error",
     "translation": "Failed to open connection"
   },
@@ -5908,6 +6200,10 @@
     "translation": "Failed to authenticate on SMTP server"
   },
   {
+    "id": "utils.mail.new_client.helo.error",
+    "translation": "Failed to to set the HELO to SMTP server %v"
+  },
+  {
     "id": "utils.mail.new_client.open.error",
     "translation": "Failed to open a connection to SMTP server %v"
   },
@@ -5917,7 +6213,7 @@
   },
   {
     "id": "utils.mail.send_mail.from_address.app_error",
-    "translation": "Failed to add from email address"
+    "translation": "Notification From Address setting is missing or invalid."
   },
   {
     "id": "utils.mail.send_mail.msg.app_error",
@@ -5933,7 +6229,7 @@
   },
   {
     "id": "utils.mail.send_mail.to_address.app_error",
-    "translation": "Failed to add to email address"
+    "translation": "Notification To Address setting is missing or invalid."
   },
   {
     "id": "utils.mail.test.configured.error",

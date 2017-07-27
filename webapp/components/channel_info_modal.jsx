@@ -9,6 +9,8 @@ import {Modal} from 'react-bootstrap';
 import TeamStore from 'stores/team_store.jsx';
 import * as TextFormatting from 'utils/text_formatting.jsx';
 
+import PropTypes from 'prop-types';
+
 import React from 'react';
 
 export default class ChannelInfoModal extends React.Component {
@@ -27,6 +29,8 @@ export default class ChannelInfoModal extends React.Component {
     render() {
         let channel = this.props.channel;
         let channelIcon;
+        const globeIcon = Constants.GLOBE_ICON_SVG;
+        const lockIcon = Constants.LOCK_ICON_SVG;
 
         if (!channel) {
             const notFound = Utils.localizeMessage('channel_info.notFound', 'No Channel Found');
@@ -41,9 +45,19 @@ export default class ChannelInfoModal extends React.Component {
         }
 
         if (channel.type === 'O') {
-            channelIcon = (<span className='fa fa-globe'/>);
+            channelIcon = (
+                <span
+                    className='icon icon__globe icon--body'
+                    dangerouslySetInnerHTML={{__html: globeIcon}}
+                />
+            );
         } else if (channel.type === 'P') {
-            channelIcon = (<span className='fa fa-lock'/>);
+            channelIcon = (
+                <span
+                    className='icon icon__globe icon--body'
+                    dangerouslySetInnerHTML={{__html: lockIcon}}
+                />
+            );
         }
 
         const channelURL = TeamStore.getCurrentTeamUrl() + '/channels/' + channel.name;
@@ -137,6 +151,6 @@ export default class ChannelInfoModal extends React.Component {
 }
 
 ChannelInfoModal.propTypes = {
-    onHide: React.PropTypes.func.isRequired,
-    channel: React.PropTypes.object.isRequired
+    onHide: PropTypes.func.isRequired,
+    channel: PropTypes.object.isRequired
 };

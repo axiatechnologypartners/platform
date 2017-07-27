@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -53,8 +52,20 @@ const (
 	RotatedCCWMirrored = 7
 	RotatedCW          = 8
 
-	MaxImageSize = 6048 * 4032 // 24 megapixels, roughly 36MB as a raw image
+	MaxImageSize                 = 6048 * 4032 // 24 megapixels, roughly 36MB as a raw image
+	IMAGE_THUMBNAIL_PIXEL_WIDTH  = 120
+	IMAGE_THUMBNAIL_PIXEL_HEIGHT = 100
+	IMAGE_PREVIEW_PIXEL_WIDTH    = 1024
 )
+
+// Similar to s3.New() but allows initialization of signature v2 or signature v4 client.
+// If signV2 input is false, function always returns signature v4.
+func s3New(endpoint, accessKey, secretKey string, secure bool, signV2 bool) (*s3.Client, error) {
+	if signV2 {
+		return s3.NewV2(endpoint, accessKey, secretKey, secure)
+	}
+	return s3.NewV4(endpoint, accessKey, secretKey, secure)
+}
 
 func ReadFile(path string) ([]byte, *model.AppError) {
 	if utils.Cfg.FileSettings.DriverName == model.IMAGE_DRIVER_S3 {
@@ -62,7 +73,8 @@ func ReadFile(path string) ([]byte, *model.AppError) {
 		accessKey := utils.Cfg.FileSettings.AmazonS3AccessKeyId
 		secretKey := utils.Cfg.FileSettings.AmazonS3SecretAccessKey
 		secure := *utils.Cfg.FileSettings.AmazonS3SSL
-		s3Clnt, err := s3.New(endpoint, accessKey, secretKey, secure)
+		signV2 := *utils.Cfg.FileSettings.AmazonS3SignV2
+		s3Clnt, err := s3New(endpoint, accessKey, secretKey, secure, signV2)
 		if err != nil {
 			return nil, model.NewLocAppError("ReadFile", "api.file.read_file.s3.app_error", nil, err.Error())
 		}
@@ -94,14 +106,19 @@ func MoveFile(oldPath, newPath string) *model.AppError {
 		accessKey := utils.Cfg.FileSettings.AmazonS3AccessKeyId
 		secretKey := utils.Cfg.FileSettings.AmazonS3SecretAccessKey
 		secure := *utils.Cfg.FileSettings.AmazonS3SSL
-		s3Clnt, err := s3.New(endpoint, accessKey, secretKey, secure)
+		signV2 := *utils.Cfg.FileSettings.AmazonS3SignV2
+		s3Clnt, err := s3New(endpoint, accessKey, secretKey, secure, signV2)
 		if err != nil {
 			return model.NewLocAppError("moveFile", "api.file.write_file.s3.app_error", nil, err.Error())
 		}
 		bucket := utils.Cfg.FileSettings.AmazonS3Bucket
 
-		var copyConds = s3.NewCopyConditions()
-		if err = s3Clnt.CopyObject(bucket, newPath, "/"+path.Join(bucket, oldPath), copyConds); err != nil {
+		source := s3.NewSourceInfo(bucket, oldPath, nil)
+		destination, err := s3.NewDestinationInfo(bucket, newPath, nil, nil)
+		if err != nil {
+			return model.NewLocAppError("moveFile", "api.file.write_file.s3.app_error", nil, err.Error())
+		}
+		if err = s3Clnt.CopyObject(destination, source); err != nil {
 			return model.NewLocAppError("moveFile", "api.file.move_file.delete_from_s3.app_error", nil, err.Error())
 		}
 		if err = s3Clnt.RemoveObject(bucket, oldPath); err != nil {
@@ -128,10 +145,12 @@ func WriteFile(f []byte, path string) *model.AppError {
 		accessKey := utils.Cfg.FileSettings.AmazonS3AccessKeyId
 		secretKey := utils.Cfg.FileSettings.AmazonS3SecretAccessKey
 		secure := *utils.Cfg.FileSettings.AmazonS3SSL
-		s3Clnt, err := s3.New(endpoint, accessKey, secretKey, secure)
+		signV2 := *utils.Cfg.FileSettings.AmazonS3SignV2
+		s3Clnt, err := s3New(endpoint, accessKey, secretKey, secure, signV2)
 		if err != nil {
 			return model.NewLocAppError("WriteFile", "api.file.write_file.s3.app_error", nil, err.Error())
 		}
+
 		bucket := utils.Cfg.FileSettings.AmazonS3Bucket
 		ext := filepath.Ext(path)
 
@@ -464,15 +483,24 @@ func DoUploadFile(teamId string, channelId string, userId string, rawFilename st
 }
 
 func HandleImages(previewPathList []string, thumbnailPathList []string, fileData [][]byte) {
-	for i, data := range fileData {
-		go func(i int, data []byte) {
-			img, width, height := prepareImage(fileData[i])
-			if img != nil {
-				go generateThumbnailImage(*img, thumbnailPathList[i], width, height)
-				go generatePreviewImage(*img, previewPathList[i], width)
-			}
-		}(i, data)
+	wg := new(sync.WaitGroup)
+
+	for i := range fileData {
+		img, width, height := prepareImage(fileData[i])
+		if img != nil {
+			wg.Add(2)
+			go func(img *image.Image, path string, width int, height int) {
+				defer wg.Done()
+				generateThumbnailImage(*img, path, width, height)
+			}(img, thumbnailPathList[i], width, height)
+
+			go func(img *image.Image, path string, width int) {
+				defer wg.Done()
+				generatePreviewImage(*img, path, width)
+			}(img, previewPathList[i], width)
+		}
 	}
+	wg.Wait()
 }
 
 func prepareImage(fileData []byte) (*image.Image, int, int) {
@@ -495,30 +523,35 @@ func prepareImage(fileData []byte) (*image.Image, int, int) {
 	}
 
 	// Flip the image to be upright
-	orientation, _ := getImageOrientation(fileData)
-
-	switch orientation {
-	case UprightMirrored:
-		img = imaging.FlipH(img)
-	case UpsideDown:
-		img = imaging.Rotate180(img)
-	case UpsideDownMirrored:
-		img = imaging.FlipV(img)
-	case RotatedCWMirrored:
-		img = imaging.Transpose(img)
-	case RotatedCCW:
-		img = imaging.Rotate270(img)
-	case RotatedCCWMirrored:
-		img = imaging.Transverse(img)
-	case RotatedCW:
-		img = imaging.Rotate90(img)
-	}
+	orientation, _ := getImageOrientation(bytes.NewReader(fileData))
+	img = makeImageUpright(img, orientation)
 
 	return &img, width, height
 }
 
-func getImageOrientation(imageData []byte) (int, error) {
-	if exifData, err := exif.Decode(bytes.NewReader(imageData)); err != nil {
+func makeImageUpright(img image.Image, orientation int) image.Image {
+	switch orientation {
+	case UprightMirrored:
+		return imaging.FlipH(img)
+	case UpsideDown:
+		return imaging.Rotate180(img)
+	case UpsideDownMirrored:
+		return imaging.FlipV(img)
+	case RotatedCWMirrored:
+		return imaging.Transpose(img)
+	case RotatedCCW:
+		return imaging.Rotate270(img)
+	case RotatedCCWMirrored:
+		return imaging.Transverse(img)
+	case RotatedCW:
+		return imaging.Rotate90(img)
+	default:
+		return img
+	}
+}
+
+func getImageOrientation(input io.Reader) (int, error) {
+	if exifData, err := exif.Decode(input); err != nil {
 		return Upright, err
 	} else {
 		if tag, err := exifData.Get("Orientation"); err != nil {
@@ -535,18 +568,18 @@ func getImageOrientation(imageData []byte) (int, error) {
 }
 
 func generateThumbnailImage(img image.Image, thumbnailPath string, width int, height int) {
-	thumbWidth := float64(utils.Cfg.FileSettings.ThumbnailWidth)
-	thumbHeight := float64(utils.Cfg.FileSettings.ThumbnailHeight)
+	thumbWidth := float64(IMAGE_THUMBNAIL_PIXEL_WIDTH)
+	thumbHeight := float64(IMAGE_THUMBNAIL_PIXEL_HEIGHT)
 	imgWidth := float64(width)
 	imgHeight := float64(height)
 
 	var thumbnail image.Image
-	if imgHeight < thumbHeight && imgWidth < thumbWidth {
+	if imgHeight < IMAGE_THUMBNAIL_PIXEL_HEIGHT && imgWidth < thumbWidth {
 		thumbnail = img
 	} else if imgHeight/imgWidth < thumbHeight/thumbWidth {
-		thumbnail = imaging.Resize(img, 0, utils.Cfg.FileSettings.ThumbnailHeight, imaging.Lanczos)
+		thumbnail = imaging.Resize(img, 0, IMAGE_THUMBNAIL_PIXEL_HEIGHT, imaging.Lanczos)
 	} else {
-		thumbnail = imaging.Resize(img, utils.Cfg.FileSettings.ThumbnailWidth, 0, imaging.Lanczos)
+		thumbnail = imaging.Resize(img, IMAGE_THUMBNAIL_PIXEL_WIDTH, 0, imaging.Lanczos)
 	}
 
 	buf := new(bytes.Buffer)
@@ -563,8 +596,9 @@ func generateThumbnailImage(img image.Image, thumbnailPath string, width int, he
 
 func generatePreviewImage(img image.Image, previewPath string, width int) {
 	var preview image.Image
-	if width > int(utils.Cfg.FileSettings.PreviewWidth) {
-		preview = imaging.Resize(img, utils.Cfg.FileSettings.PreviewWidth, utils.Cfg.FileSettings.PreviewHeight, imaging.Lanczos)
+
+	if width > IMAGE_PREVIEW_PIXEL_WIDTH {
+		preview = imaging.Resize(img, IMAGE_PREVIEW_PIXEL_WIDTH, 0, imaging.Lanczos)
 	} else {
 		preview = img
 	}

@@ -11,9 +11,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/mail"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,7 +33,6 @@ const (
 type StringInterface map[string]interface{}
 type StringMap map[string]string
 type StringArray []string
-type EncryptStringMap map[string]string
 
 type AppError struct {
 	Id            string `json:"id"`
@@ -264,6 +265,23 @@ func StringFromJson(data io.Reader) string {
 	}
 }
 
+func GetServerIpAddress() string {
+	if addrs, err := net.InterfaceAddrs(); err != nil {
+		return ""
+	} else {
+		for _, addr := range addrs {
+
+			if ip, ok := addr.(*net.IPNet); ok && !ip.IP.IsLoopback() {
+				if ip.IP.To4() != nil {
+					return ip.IP.String()
+				}
+			}
+		}
+	}
+
+	return ""
+}
+
 func IsLower(s string) bool {
 	if strings.ToLower(s) == s {
 		return true
@@ -457,6 +475,18 @@ func IsValidWebsocketUrl(rawUrl string) bool {
 	}
 
 	if _, err := url.ParseRequestURI(rawUrl); err != nil {
+		return false
+	}
+
+	return true
+}
+
+func IsValidTrueOrFalseString(value string) bool {
+	return value == "true" || value == "false"
+}
+
+func IsValidNumberString(value string) bool {
+	if _, err := strconv.Atoi(value); err != nil {
 		return false
 	}
 
